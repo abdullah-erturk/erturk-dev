@@ -147,18 +147,6 @@
         ]
       },
       {
-        "title": "SecureBoot Grub2FM Suite",
-        "icon": "fa-solid fa-shield-halved",
-        "desc_tr": "Secure Boot etkin sistemlerde Grub2FileManager kullanımını mümkün kılan imzalı önyükleyici paketi.",
-        "desc_en": "A signed bootloader package that enables Grub2FileManager usage on Secure Boot enabled systems.",
-        "links": [
-          {
-            "type": "github",
-            "url": "https://github.com/abdullah-erturk/SecureBoot-Grub2FM-Suite"
-          }
-        ]
-      },
-      {
         "title": "USB HDD Protect",
         "icon": "fa-solid fa-shield-virus",
         "desc_tr": "USB ve harici disk sürücüleri yazma korumalı veya erişim kısıtlamalı hale getiren güvenlik betiği.",
@@ -383,6 +371,18 @@
           {
             "type": "github",
             "url": "https://github.com/abdullah-erturk/Ventoy-Grub2FM-Multiboot-With-Original-Files"
+          }
+        ]
+      },
+      {
+        "title": "SecureBoot Grub2FM Suite",
+        "icon": "fa-solid fa-shield-halved",
+        "desc_tr": "Secure Boot etkin sistemlerde Grub2FileManager kullanımını mümkün kılan imzalı önyükleyici paketi.",
+        "desc_en": "A signed bootloader package that enables Grub2FileManager usage on Secure Boot enabled systems.",
+        "links": [
+          {
+            "type": "github",
+            "url": "https://github.com/abdullah-erturk/SecureBoot-Grub2FM-Suite"
           }
         ]
       }
