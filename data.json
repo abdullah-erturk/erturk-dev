@@ -1,0 +1,391 @@
+[
+  {
+    "id": "net",
+    "title_tr": "Ağ Araçları",
+    "title_en": "Network Tools",
+    "icon": "fa-solid fa-network-wired",
+    "cards": [
+      {
+        "pinOrder": 1,
+        "title": "iPXE Manager — Network HTTP Boot",
+        "icon": "fa-solid fa-network-wired",
+        "desc_tr": "HTTP üzerinden ağ önyüklemesi sağlayan iPXE yönetim aracı. WinPE ve Live ortamları için idealdir.",
+        "desc_en": "iPXE management tool for network HTTP booting. Ideal for WinPE and Live environments.",
+        "links": [
+          {
+            "type": "github",
+            "url": "https://github.com/abdullah-erturk/iPXE-Manager"
+          }
+        ]
+      },
+      {
+        "title": "Ping Monitor Enterprise",
+        "icon": "fa-solid fa-heart-pulse",
+        "desc_tr": "Birden fazla ağ cihazını aynı anda izleyen, bağlantı durumunu ve gecikmesini gerçek zamanlı gösteren araç.",
+        "desc_en": "A real-time tool that monitors multiple network devices simultaneously, showing connection status and latency.",
+        "links": [
+          {
+            "type": "github",
+            "url": "https://github.com/abdullah-erturk/Ping-Monitor"
+          }
+        ]
+      },
+      {
+        "title": "RDP (wfreerdp) Connection Tool",
+        "icon": "fa-solid fa-desktop",
+        "desc_tr": "wfreerdp motorunu kullanan, kolaylaştırılmış RDP bağlantı yönetim aracı. Profil kaydı ve hızlı bağlantı destekler.",
+        "desc_en": "A simplified RDP connection manager using the wfreerdp engine, with profile saving and quick connect support.",
+        "links": [
+          {
+            "type": "github",
+            "url": "https://github.com/abdullah-erturk/RDP-wfreerdp-Connection-Tool"
+          }
+        ]
+      },
+      {
+        "title": "NetScan — Network Inventory Scanner",
+        "icon": "fa-solid fa-network-wired",
+        "desc_tr": "Yerel ağdaki cihazları tarayıp IP, MAC ve cihaz adlarını listeleyen ağ envanter aracı.",
+        "desc_en": "A network inventory scanner that detects devices on the local network and lists their IP, MAC, and hostnames.",
+        "links": [
+          {
+            "type": "github",
+            "url": "https://github.com/abdullah-erturk/Network-Inventory-Scanner/"
+          }
+        ]
+      },
+      {
+        "title": "NetIPManager",
+        "icon": "fa-solid fa-network-wired",
+        "desc_tr": "Windows'ta ağ adaptörü IP adreslerini hızlıca yönetmeyi ve değiştirmeyi sağlayan araç.",
+        "desc_en": "A tool for quickly managing and changing network adapter IP addresses on Windows.",
+        "links": [
+          {
+            "type": "github",
+            "url": "https://github.com/abdullah-erturk/NetIPManager"
+          }
+        ]
+      },
+      {
+        "title": "iPXE ISO EFI MBR SecureBoot Support",
+        "icon": "fa-solid fa-compact-disc",
+        "desc_tr": "EFI, MBR ve Secure Boot desteğiyle önyüklenebilir iPXE ISO imajı oluşturma projesi.",
+        "desc_en": "A project for creating bootable iPXE ISO images with EFI, MBR, and Secure Boot support.",
+        "links": [
+          {
+            "type": "github",
+            "url": "https://github.com/abdullah-erturk/iPXE-iso-efi-mbr-secureboot-support-"
+          }
+        ]
+      },
+      {
+        "title": "RustDesk ID Changer",
+        "icon": "fa-solid fa-id-card",
+        "desc_tr": "RustDesk uzak masaüstü uygulamasının benzersiz cihaz kimliğini kolayca değiştirmeye yarayan araç.",
+        "desc_en": "A tool for easily changing the unique device ID of the RustDesk remote desktop application.",
+        "links": [
+          {
+            "type": "github",
+            "url": "https://github.com/abdullah-erturk/RustDesk-ID-Changer"
+          }
+        ]
+      },
+      {
+        "title": "RustDesk Silent Installation",
+        "icon": "fa-solid fa-volume-xmark",
+        "desc_tr": "RustDesk'i kullanıcıya herhangi bir bildirim göstermeden sessizce yükleyen otomasyon betiği.",
+        "desc_en": "An automation script that silently installs RustDesk without showing any notifications to the user.",
+        "links": [
+          {
+            "type": "github",
+            "url": "https://github.com/abdullah-erturk/RustDesk-Silent-Installation"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "sec",
+    "title_tr": "Güvenlik",
+    "title_en": "Security",
+    "icon": "fa-solid fa-shield-halved",
+    "cards": [
+      {
+        "title": "Encryption-Decryption Tool",
+        "icon": "fa-solid fa-lock",
+        "desc_tr": "Dosya ve metin içeriklerini şifreleyip çözen, farklı algoritmaları destekleyen güvenlik aracı.",
+        "desc_en": "A security tool that encrypts and decrypts files and text content, supporting multiple algorithms.",
+        "links": [
+          {
+            "type": "github",
+            "url": "https://github.com/abdullah-erturk/Encryption-Decryption-Tool"
+          }
+        ]
+      },
+      {
+        "title": "Trusted Installer Launcher",
+        "icon": "fa-solid fa-shield-halved",
+        "desc_tr": "Windows TrustedInstaller yetkisiyle uygulama başlatmayı sağlayan güvenlik aracı.",
+        "desc_en": "A security tool that allows launching applications with Windows TrustedInstaller privileges.",
+        "links": [
+          {
+            "type": "github",
+            "url": "https://github.com/abdullah-erturk/Trusted-Installer-Launcher"
+          }
+        ]
+      },
+      {
+        "title": "Secure Encode",
+        "icon": "fa-solid fa-shield-halved",
+        "desc_tr": "Betik ve metin dosyalarını güvenli biçimde kodlayıp yetkisiz erişime karşı koruyan araç.",
+        "desc_en": "A tool that securely encodes script and text files to protect them against unauthorized access.",
+        "links": [
+          {
+            "type": "github",
+            "url": "https://github.com/abdullah-erturk/Secure-Encode"
+          }
+        ]
+      },
+      {
+        "title": "SecureBoot Grub2FM Suite",
+        "icon": "fa-solid fa-shield-halved",
+        "desc_tr": "Secure Boot etkin sistemlerde Grub2FileManager kullanımını mümkün kılan imzalı önyükleyici paketi.",
+        "desc_en": "A signed bootloader package that enables Grub2FileManager usage on Secure Boot enabled systems.",
+        "links": [
+          {
+            "type": "github",
+            "url": "https://github.com/abdullah-erturk/SecureBoot-Grub2FM-Suite"
+          }
+        ]
+      },
+      {
+        "title": "USB HDD Protect",
+        "icon": "fa-solid fa-shield-virus",
+        "desc_tr": "USB ve harici disk sürücüleri yazma korumalı veya erişim kısıtlamalı hale getiren güvenlik betiği.",
+        "desc_en": "A security script that sets USB and external drives to write-protected or access-restricted mode.",
+        "links": [
+          {
+            "type": "github",
+            "url": "https://github.com/abdullah-erturk/USB-HDD_Protect"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "win",
+    "title_tr": "Windows Araçları",
+    "title_en": "Windows Tools",
+    "icon": "fa-brands fa-windows",
+    "cards": [
+      {
+        "title": "Diskpart GUI",
+        "icon": "fa-solid fa-hard-drive",
+        "desc_tr": "Windows'un yerleşik Diskpart komut satırı aracına grafiksel arayüz kazandıran uygulama.",
+        "desc_en": "A graphical interface for Windows' built-in Diskpart command-line tool.",
+        "links": [
+          {
+            "type": "github",
+            "url": "https://github.com/abdullah-erturk/Diskpart-GUI"
+          }
+        ]
+      },
+      {
+        "pinOrder": 2,
+        "title": "PMAS",
+        "icon": "fa-solid fa-brain",
+        "desc_tr": "PowerShell tabanlı Windows ve Office aktivasyon betiği.",
+        "desc_en": "PowerShell-based Windows and Office activation script.",
+        "links": [
+          {
+            "type": "github",
+            "url": "https://github.com/abdullah-erturk/pmas"
+          },
+          {
+            "type": "info",
+            "url": "https://erturk-dev.netlify.app/run"
+          }
+        ]
+      },
+      {
+        "title": "Office 365 Enterprise Offline/Online Installer",
+        "icon": "fa-brands fa-microsoft",
+        "desc_tr": "Office 365 Enterprise kurulumunu hem çevrimiçi hem de çevrimdışı olarak kolaylaştıran betik tabanlı yükleyici.",
+        "desc_en": "A script-based installer that simplifies Office 365 Enterprise installation both online and offline.",
+        "links": [
+          {
+            "type": "github",
+            "url": "https://github.com/abdullah-erturk/Office-365-Enterprise-Setup"
+          }
+        ]
+      },
+      {
+        "title": "WinPE",
+        "icon": "fa-brands fa-windows",
+        "desc_tr": "Özelleştirilmiş WinPE ortamı; kurtarma, disk yönetimi ve sistem onarımı araçlarını içerir.",
+        "desc_en": "A customized WinPE environment including recovery, disk management, and system repair tools.",
+        "links": [
+          {
+            "type": "github",
+            "url": "https://github.com/abdullah-erturk/WinPE"
+          }
+        ]
+      },
+      {
+        "title": "Win10+ Setup Disk WinToGo",
+        "icon": "fa-solid fa-compact-disc",
+        "desc_tr": "Windows 10 ve üstü (Windows 11 dahil) ISO dosyalarını destekleyen, kurulum diskini WinToGo olarak hazırlayan taşınabilir sistem oluşturma aracı.",
+        "desc_en": "A portable system creation tool that supports Windows 10 and later (including Windows 11) ISO files, preparing setup disks as WinToGo.",
+        "links": [
+          {
+            "type": "github",
+            "url": "https://github.com/abdullah-erturk/Win10-Setup-Disk-WinToGo"
+          }
+        ]
+      },
+      {
+        "title": "Scan & Repair Windows",
+        "icon": "fa-solid fa-broom",
+        "desc_tr": "SFC, DISM ve diğer Windows onarım araçlarını tek betikle çalıştıran sistem temizleme aracı.",
+        "desc_en": "A system cleanup tool that runs SFC, DISM, and other Windows repair utilities in a single script.",
+        "links": [
+          {
+            "type": "github",
+            "url": "https://github.com/abdullah-erturk/scan_repair_windows"
+          }
+        ]
+      },
+      {
+        "title": "Windows Update Pause Resume",
+        "icon": "fa-solid fa-gears",
+        "desc_tr": "Windows güncellemelerini tek tıkla duraklatıp devam ettirmeye olanak tanıyan basit yönetim betiği.",
+        "desc_en": "A simple management script that allows pausing and resuming Windows updates with a single click.",
+        "links": [
+          {
+            "type": "github",
+            "url": "https://github.com/abdullah-erturk/Windows-Update-Pause-Resume"
+          }
+        ]
+      },
+      {
+        "title": "HardwareInfo",
+        "icon": "fa-solid fa-microchip",
+        "desc_tr": "CPU, RAM, disk ve ana kart gibi donanım bileşenlerini tespit edip raporlayan bilgi toplama aracı.",
+        "desc_en": "A hardware information tool that detects and reports system components such as CPU, RAM, disk, and motherboard.",
+        "links": [
+          {
+            "type": "github",
+            "url": "https://github.com/abdullah-erturk/HardwareInfo"
+          }
+        ]
+      },
+      {
+        "title": "Academia & Scribd Downloader",
+        "icon": "fa-solid fa-bolt",
+        "desc_tr": "Academia.edu ve Scribd'den belge indirmeyi kolaylaştıran betik tabanlı araç.",
+        "desc_en": "A script-based tool that simplifies downloading documents from Academia.edu and Scribd.",
+        "links": [
+          {
+            "type": "github",
+            "url": "https://github.com/abdullah-erturk/Academia-Scribd-Downloader"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "bak",
+    "title_tr": "Yedekleme & Kurtarma",
+    "title_en": "Backup & Recovery",
+    "icon": "fa-solid fa-hard-drive",
+    "cards": [
+      {
+        "title": "Acronis True Image 2026 Portable <br>(for Live & WinPE)",
+        "icon": "fa-solid fa-cloud-arrow-down",
+        "desc_tr": "Live ve WinPE ortamlarında kurulum gerektirmeden çalışan Acronis True Image 2026 portatif sürümü.",
+        "desc_en": "Portable version of Acronis True Image 2026 that runs without installation in Live and WinPE environments.",
+        "links": [
+          {
+            "type": "mega",
+            "url": "https://mega.nz/folder/tUhznB6T#s9yjwua2YIjf5YhhTKMwIg",
+            "text": "Mega Link"
+          },
+          {
+            "type": "info",
+            "url": "Acronis.html"
+          }
+        ],
+        "pinOrder": 4
+      },
+      {
+        "title": "Windows Backup & Restore Tool (C#)",
+        "icon": "fa-solid fa-hard-drive",
+        "desc_tr": "C# ile geliştirilmiş, Windows sistem yedeği alma ve geri yükleme aracı. Kullanıcı dostu arayüze sahiptir.",
+        "desc_en": "A user-friendly Windows system backup and restore tool developed in C#.",
+        "links": [
+          {
+            "type": "github",
+            "url": "https://github.com/abdullah-erturk/Windows-Backup-Restore-Tool"
+          }
+        ],
+        "pinOrder": 3
+      },
+      {
+        "title": "Windows Backup & Recovery Tool (console/cmd)",
+        "icon": "fa-solid fa-hard-drive",
+        "desc_tr": "Komut satırı üzerinden Windows yedekleme ve kurtarma işlemlerini yürüten hafif konsol aracı.",
+        "desc_en": "A lightweight console tool that performs Windows backup and recovery operations via command line.",
+        "links": [
+          {
+            "type": "github",
+            "url": "https://github.com/abdullah-erturk/Windows-Backup-Recovery-Tool"
+          }
+        ]
+      },
+      {
+        "title": "Acronis Shell Extension",
+        "icon": "fa-solid fa-puzzle-piece",
+        "desc_tr": "Acronis ile alınmış .tib ve .tibx yedek dosyalarını, bilgisayarda Acronis kurulu olmasa dahi Explorer'da çift tıklayarak içeriğini görüntülemenizi sağlayan kabuk uzantısı.",
+        "desc_en": "A shell extension that lets you browse the contents of Acronis .tib and .tibx backup files directly in Explorer with a double-click, even without Acronis installed.",
+        "links": [
+          {
+            "type": "github",
+            "url": "https://github.com/abdullah-erturk/Acronis-Shell-Extension"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "boot",
+    "title_tr": "Önyükleme & Çoklu Önyükleme",
+    "title_en": "Boot & Multiboot",
+    "icon": "fa-solid fa-terminal",
+    "cards": [
+      {
+        "title": "Ventoy Command Line Installer",
+        "icon": "fa-solid fa-terminal",
+        "desc_tr": "Ventoy'u komut satırından kurup yönetmeyi sağlayan, GUI gerektirmeyen betik yükleyici.",
+        "desc_en": "A script-based installer for Ventoy that allows setup and management from the command line without a GUI.",
+        "links": [
+          {
+            "type": "github",
+            "url": "https://github.com/abdullah-erturk/Ventoy-Command-Line-Installer"
+          }
+        ]
+      },
+      {
+        "title": "Ventoy Grub2FM Multiboot With Original Files",
+        "icon": "fa-solid fa-layer-group",
+        "desc_tr": "Orijinal ISO dosyalarını değiştirmeden Grub2FM ile çoklu önyükleme kurulumu sağlayan yapılandırma paketi.",
+        "desc_en": "A configuration package that enables Grub2FM multiboot setup without modifying original ISO files.",
+        "links": [
+          {
+            "type": "github",
+            "url": "https://github.com/abdullah-erturk/Ventoy-Grub2FM-Multiboot-With-Original-Files"
+          }
+        ]
+      }
+    ]
+  }
+]

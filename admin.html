@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <title>Portfolyo Yönetim Paneli</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    
+    :root {
+      --primary: #14b8a6;
+      --primary-dark: #0d9488;
+      --bg: #0b0f19;
+      --card-bg: rgba(255, 255, 255, 0.05);
+      --text: #f1f5f9;
+      --text-dim: #94a3b8;
+      --border: rgba(255, 255, 255, 0.1);
+      --danger: #ef4444;
+      --success: #10b981;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 40px auto;
+      padding: 20px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    h1 {
+      margin: 0;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    button {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+    button:hover { background: var(--primary-dark); }
+    button.danger { background: transparent; border: 1px solid var(--danger); color: var(--danger); }
+    button.danger:hover { background: var(--danger); color: white; }
+    button.secondary { background: var(--card-bg); border: 1px solid var(--border); color: var(--text); }
+    button.secondary:hover { border-color: var(--primary); color: var(--primary); }
+
+    .category-block {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .category-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    
+    .category-header h2 { margin: 0; font-size: 1.2rem; display: flex; align-items: center; gap: 10px; }
+    
+    .card-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .card-item {
+      background: rgba(0,0,0,0.2);
+      border: 1px solid var(--border);
+      padding: 12px 15px;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .card-item-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 500;
+    }
+    
+    .card-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    /* Modal Styles */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(5px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+    .modal-overlay.active { display: flex; }
+
+    .modal {
+      background: #111827;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      width: 100%;
+      max-width: 600px;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 24px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+    }
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .modal-header h2 { margin: 0; color: var(--primary); }
+    .close-btn { background: none; border: none; color: var(--text-dim); font-size: 20px; padding: 0; }
+    .close-btn:hover { color: var(--danger); background: none; }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--text-dim);
+      font-size: 0.9rem;
+    }
+    .form-group input, .form-group textarea, .form-group select {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: rgba(0,0,0,0.2);
+      color: var(--text);
+      font-family: inherit;
+    }
+    .form-group input:focus, .form-group textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+    
+    .icon-preview-wrapper {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .icon-preview {
+      width: 40px; height: 40px;
+      border-radius: 8px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      color: var(--primary);
+    }
+
+    .links-container {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border);
+      padding: 15px;
+      border-radius: 8px;
+    }
+    .link-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+      align-items: flex-start;
+    }
+    .link-row select { width: 120px; }
+    .link-row input { flex: 1; }
+    
+    #downloadArea {
+      margin-top: 30px;
+      padding: 20px;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid var(--success);
+      border-radius: 12px;
+      text-align: center;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1><i class="fa-solid fa-screwdriver-wrench"></i> Portfolyo Yönetim Paneli</h1>
+    <div>
+      <button class="secondary" onclick="openCatModal(-1)"><i class="fa-solid fa-folder-plus"></i> Kategori Ekle</button>
+      <button class="secondary" onclick="addNewCard()"><i class="fa-solid fa-plus"></i> Yeni Kart Ekle</button>
+      <button onclick="saveData()"><i class="fa-solid fa-download"></i> Değişiklikleri Kaydet</button>
+    </div>
+  </header>
+
+  <div id="downloadArea">
+    <h3 style="color: var(--success); margin-top:0;">Hazır!</h3>
+    <p><code>data.json</code> dosyanız oluşturuldu. İndirip projenizdeki eski dosyanın üzerine yazdırın.</p>
+    <a id="downloadLink" style="display:inline-block; margin-top:10px; padding:10px 20px; background:var(--success); color:white; text-decoration:none; border-radius:8px; font-weight:600;"><i class="fa-solid fa-file-arrow-down"></i> data.json İndir</a>
+  </div>
+
+  <div id="admin-root">
+    <!-- Categories will be injected here -->
+    <div style="text-align:center; padding:50px; color:var(--text-dim);">
+      <i class="fa-solid fa-spinner fa-spin fa-2x"></i><br><br>Veriler yükleniyor...
+    </div>
+  </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="modalTitle">Kart Düzenle</h2>
+      <button class="close-btn" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    
+    <div class="form-group">
+      <label>Kategori</label>
+      <select id="f_category"></select>
+    </div>
+    
+    <div class="form-group">
+      <label>Kart Modunda Sabitleme (Sıra No) (İsteğe bağlı)</label>
+      <input type="number" id="f_pinOrder" placeholder="Örn: 1 (1. sırada göster), 2, 3..." min="1">
+    </div>
+
+    <div class="form-group">
+      <label>Başlık</label>
+      <input type="text" id="f_title" required>
+    </div>
+    
+    <div class="form-group">
+      <label>İkon Sınıfı (Örn: fa-solid fa-network-wired)</label>
+      <div class="icon-preview-wrapper">
+        <input type="text" id="f_icon" oninput="updateIconPreview()">
+        <div class="icon-preview"><i id="icon_preview_el" class="fa-solid fa-network-wired"></i></div>
+      </div>
+    </div>
+    
+    <div class="form-group">
+      <label>Açıklama (TR)</label>
+      <textarea id="f_desc_tr" rows="3"></textarea>
+    </div>
+    
+    <div class="form-group">
+      <label>Açıklama (EN)</label>
+      <textarea id="f_desc_en" rows="3"></textarea>
+    </div>
+
+    <div class="form-group">
+      <label>Linkler</label>
+      <div class="links-container" id="f_links">
+        <!-- Links dynamically generated -->
+      </div>
+      <button type="button" class="secondary" style="margin-top:10px; padding:5px 10px; font-size:0.8rem;" onclick="addLinkRow()">+ Link Ekle</button>
+    </div>
+    
+    <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+      <button class="secondary" onclick="closeModal()">İptal</button>
+      <button onclick="saveCard()">Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<!-- Category Modal -->
+<div class="modal-overlay" id="catModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="catModalTitle">Kategori Düzenle</h2>
+      <button class="close-btn" onclick="closeCatModal()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    
+    <div class="form-group">
+      <label>Kategori ID (örn: sec, net, boot)</label>
+      <input type="text" id="fc_id" required>
+    </div>
+    
+    <div class="form-group">
+      <label>Başlık (TR)</label>
+      <input type="text" id="fc_title_tr" required>
+    </div>
+    
+    <div class="form-group">
+      <label>Başlık (EN)</label>
+      <input type="text" id="fc_title_en" required>
+    </div>
+    
+    <div class="form-group">
+      <label>İkon Sınıfı (Örn: fa-solid fa-network-wired)</label>
+      <div class="icon-preview-wrapper">
+        <input type="text" id="fc_icon" oninput="updateCatIconPreview()">
+        <div class="icon-preview"><i id="cat_icon_preview_el" class="fa-solid fa-folder"></i></div>
+      </div>
+    </div>
+    
+    <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+      <button class="secondary" onclick="closeCatModal()">İptal</button>
+      <button onclick="saveCategory()">Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let portfolioData = [];
+let editingCard = null; // { catIndex, cardIndex } null means new card
+
+// Verileri yükle
+async function loadData() {
+  try {
+    const res = await fetch('data.json', { cache: 'no-cache' });
+    portfolioData = await res.json();
+    renderAdmin();
+  } catch(err) {
+    document.getElementById('admin-root').innerHTML = `<p style="color:var(--danger)">Hata: data.json bulunamadı. Lütfen panel ile data.json'un aynı klasörde olduğundan emin olun.</p>`;
+  }
+}
+
+// Arayüzü çiz
+function renderAdmin() {
+  const root = document.getElementById('admin-root');
+  let html = '';
+  
+  portfolioData.forEach((cat, catIndex) => {
+    html += `
+      <div class="category-block">
+        <div class="category-header">
+          <h2><i class="${cat.icon}"></i> ${cat.title_tr} (${cat.id})</h2>
+          <div class="card-actions">
+            <button class="secondary" onclick="moveCategory(${catIndex}, -1)" title="Yukarı Taşı" ${catIndex === 0 ? 'disabled' : ''}><i class="fa-solid fa-arrow-up"></i></button>
+            <button class="secondary" onclick="moveCategory(${catIndex}, 1)" title="Aşağı Taşı" ${catIndex === portfolioData.length - 1 ? 'disabled' : ''}><i class="fa-solid fa-arrow-down"></i></button>
+            <button class="secondary" onclick="openCatModal(${catIndex})" title="Kategoriyi Düzenle"><i class="fa-solid fa-pen"></i></button>
+            <button class="danger" onclick="deleteCategory(${catIndex})" title="Kategoriyi Sil"><i class="fa-solid fa-trash"></i></button>
+          </div>
+        </div>
+        <div class="card-list">
+    `;
+    
+    cat.cards.forEach((card, cardIndex) => {
+      let pinBadge = card.pinOrder ? `<span style="background:var(--primary); color:white; font-size:10px; padding:2px 6px; border-radius:4px; margin-left:8px;" title="Kart Görünümünde ${card.pinOrder}. Sırada Sabitli"><i class="fa-solid fa-thumbtack"></i> ${card.pinOrder}</span>` : '';
+      html += `
+        <div class="card-item">
+          <div class="card-item-title">
+            <i class="${card.icon}"></i> ${card.title} ${pinBadge}
+          </div>
+          <div class="card-actions">
+            <button class="secondary" onclick="moveCard(${catIndex}, ${cardIndex}, -1)" title="Yukarı Taşı" ${cardIndex === 0 ? 'disabled' : ''}><i class="fa-solid fa-arrow-up"></i></button>
+            <button class="secondary" onclick="moveCard(${catIndex}, ${cardIndex}, 1)" title="Aşağı Taşı" ${cardIndex === cat.cards.length - 1 ? 'disabled' : ''}><i class="fa-solid fa-arrow-down"></i></button>
+            <button class="secondary" onclick="openModal(${catIndex}, ${cardIndex})"><i class="fa-solid fa-pen"></i> Düzenle</button>
+            <button class="danger" onclick="deleteCard(${catIndex}, ${cardIndex})"><i class="fa-solid fa-trash"></i></button>
+          </div>
+        </div>
+      `;
+    });
+    
+    html += `
+        </div>
+      </div>
+    `;
+  });
+  
+  root.innerHTML = html;
+}
+
+// Modal işlemleri
+function openModal(catIndex, cardIndex) {
+  editingCard = { catIndex, cardIndex };
+  const card = portfolioData[catIndex].cards[cardIndex];
+  
+  document.getElementById('modalTitle').textContent = "Kart Düzenle";
+  populateCategorySelect(catIndex);
+  
+  document.getElementById('f_pinOrder').value = card.pinOrder || '';
+  document.getElementById('f_title').value = card.title || '';
+  document.getElementById('f_icon').value = card.icon || '';
+  document.getElementById('f_desc_tr').value = card.desc_tr || '';
+  document.getElementById('f_desc_en').value = card.desc_en || '';
+  
+  renderLinks(card.links || []);
+  updateIconPreview();
+  
+  document.getElementById('editModal').classList.add('active');
+}
+
+function addNewCard() {
+  editingCard = null;
+  document.getElementById('modalTitle').textContent = "Yeni Kart Ekle";
+  populateCategorySelect(0); // İlk kategori seçili gelsin
+  
+  document.getElementById('f_pinOrder').value = '';
+  document.getElementById('f_title').value = '';
+  document.getElementById('f_icon').value = 'fa-solid fa-star';
+  document.getElementById('f_desc_tr').value = '';
+  document.getElementById('f_desc_en').value = '';
+  
+  renderLinks([{ type: 'github', url: '' }]);
+  updateIconPreview();
+  
+  document.getElementById('editModal').classList.add('active');
+}
+
+function closeModal() {
+  document.getElementById('editModal').classList.remove('active');
+}
+
+function populateCategorySelect(selectedIndex) {
+  const select = document.getElementById('f_category');
+  select.innerHTML = '';
+  portfolioData.forEach((cat, index) => {
+    const option = document.createElement('option');
+    option.value = index;
+    option.textContent = cat.title_tr;
+    if(index === selectedIndex) option.selected = true;
+    select.appendChild(option);
+  });
+}
+
+function updateIconPreview() {
+  const iconClass = document.getElementById('f_icon').value;
+  document.getElementById('icon_preview_el').className = iconClass || 'fa-solid fa-question';
+}
+
+function renderLinks(links) {
+  const container = document.getElementById('f_links');
+  container.innerHTML = '';
+  links.forEach(link => addLinkRow(link));
+}
+
+function addLinkRow(link = { type: 'github', url: '', text: '' }) {
+  const container = document.getElementById('f_links');
+  const div = document.createElement('div');
+  div.className = 'link-row';
+  div.innerHTML = `
+    <select class="link-type" onchange="toggleLinkText(this)">
+      <option value="github" ${link.type === 'github' ? 'selected' : ''}>Github</option>
+      <option value="info" ${link.type === 'info' ? 'selected' : ''}>Info (Bilgi)</option>
+      <option value="mega" ${link.type === 'mega' ? 'selected' : ''}>Mega</option>
+    </select>
+    <input type="text" class="link-url" placeholder="URL" value="${link.url}">
+    <input type="text" class="link-text" placeholder="Görünen Metin (Opsiyonel)" value="${link.text || ''}" style="display: ${link.type === 'mega' ? 'block' : 'none'}; width:100px;">
+    <button type="button" class="danger" style="padding:10px;" onclick="this.parentElement.remove()"><i class="fa-solid fa-xmark"></i></button>
+  `;
+  container.appendChild(div);
+}
+
+function toggleLinkText(selectEl) {
+  const textInput = selectEl.parentElement.querySelector('.link-text');
+  if (selectEl.value === 'mega') {
+    textInput.style.display = 'block';
+  } else {
+    textInput.style.display = 'none';
+  }
+}
+
+// Kart Kaydetme
+function saveCard() {
+  if (!document.getElementById('f_title').value.trim()) {
+    alert('Başlık boş bırakılamaz!');
+    return;
+  }
+  const catIndex = parseInt(document.getElementById('f_category').value);
+  
+  // Linkleri topla
+  const links = [];
+  document.querySelectorAll('.link-row').forEach(row => {
+    const type = row.querySelector('.link-type').value;
+    const url = row.querySelector('.link-url').value;
+    const text = row.querySelector('.link-text').value;
+    if (url.trim() !== '') {
+      const l = { type, url };
+      if(type === 'mega' && text.trim() !== '') l.text = text;
+      links.push(l);
+    }
+  });
+
+  const cardData = {
+    title: document.getElementById('f_title').value,
+    icon: document.getElementById('f_icon').value,
+    desc_tr: document.getElementById('f_desc_tr').value,
+    desc_en: document.getElementById('f_desc_en').value,
+    links: links
+  };
+  
+  const po = document.getElementById('f_pinOrder').value;
+  if(po) cardData.pinOrder = parseInt(po);
+  
+  if (editingCard === null) {
+    // Yeni Ekle
+    portfolioData[catIndex].cards.push(cardData);
+  } else {
+    // Güncelle
+    if (editingCard.catIndex === catIndex) {
+      portfolioData[catIndex].cards[editingCard.cardIndex] = cardData;
+    } else {
+      // Kategori değiştiyse, eskiden sil yeniye ekle
+      portfolioData[editingCard.catIndex].cards.splice(editingCard.cardIndex, 1);
+      portfolioData[catIndex].cards.push(cardData);
+    }
+  }
+  
+  closeModal();
+  renderAdmin();
+}
+
+function deleteCard(catIndex, cardIndex) {
+  if(confirm('Bu kartı silmek istediğinize emin misiniz?')) {
+    portfolioData[catIndex].cards.splice(cardIndex, 1);
+    renderAdmin();
+  }
+}
+
+function moveCard(catIndex, cardIndex, direction) {
+  const cards = portfolioData[catIndex].cards;
+  if (cardIndex + direction >= 0 && cardIndex + direction < cards.length) {
+    const temp = cards[cardIndex];
+    cards[cardIndex] = cards[cardIndex + direction];
+    cards[cardIndex + direction] = temp;
+    renderAdmin();
+  }
+}
+
+let editingCat = -1;
+
+function openCatModal(index) {
+  editingCat = index;
+  if (index === -1) {
+    document.getElementById('catModalTitle').textContent = "Yeni Kategori Ekle";
+    document.getElementById('fc_id').value = '';
+    document.getElementById('fc_title_tr').value = '';
+    document.getElementById('fc_title_en').value = '';
+    document.getElementById('fc_icon').value = 'fa-solid fa-folder';
+  } else {
+    document.getElementById('catModalTitle').textContent = "Kategori Düzenle";
+    const cat = portfolioData[index];
+    document.getElementById('fc_id').value = cat.id || '';
+    document.getElementById('fc_title_tr').value = cat.title_tr || '';
+    document.getElementById('fc_title_en').value = cat.title_en || '';
+    document.getElementById('fc_icon').value = cat.icon || '';
+  }
+  updateCatIconPreview();
+  document.getElementById('catModal').classList.add('active');
+}
+
+function updateCatIconPreview() {
+  const iconClass = document.getElementById('fc_icon').value;
+  document.getElementById('cat_icon_preview_el').className = iconClass || 'fa-solid fa-folder';
+}
+
+function closeCatModal() {
+  document.getElementById('catModal').classList.remove('active');
+}
+
+function saveCategory() {
+  const catId = document.getElementById('fc_id').value.trim();
+  if (!catId || !document.getElementById('fc_title_tr').value.trim()) {
+    alert('Kategori ID ve Başlık (TR) boş bırakılamaz!');
+    return;
+  }
+  const isDuplicate = portfolioData.some((c, i) => c.id === catId && i !== editingCat);
+  if (isDuplicate) { alert('Bu ID zaten kullanılıyor!'); return; }
+  
+  const catData = {
+    id: catId,
+    title_tr: document.getElementById('fc_title_tr').value.trim(),
+    title_en: document.getElementById('fc_title_en').value.trim(),
+    icon: document.getElementById('fc_icon').value.trim() || 'fa-solid fa-folder',
+    cards: editingCat === -1 ? [] : portfolioData[editingCat].cards
+  };
+  
+  if (editingCat === -1) {
+    portfolioData.push(catData);
+  } else {
+    portfolioData[editingCat] = catData;
+  }
+  closeCatModal();
+  renderAdmin();
+}
+
+function deleteCategory(index) {
+  if (portfolioData.length <= 1) {
+    alert('En az bir kategori bulunmalıdır!');
+    return;
+  }
+  const cat = portfolioData[index];
+  if (cat.cards.length > 0) {
+    if (!confirm(`Bu kategori silinecek. İçindeki ${cat.cards.length} adet kart kaybolmamak için otomatik olarak ilk kategoriye taşınacaktır. Onaylıyor musunuz?`)) return;
+    const targetIndex = index === 0 ? 1 : 0;
+    portfolioData[targetIndex].cards.push(...cat.cards);
+  } else {
+    if (!confirm('Bu kategoriyi silmek istediğinize emin misiniz?')) return;
+  }
+  portfolioData.splice(index, 1);
+  renderAdmin();
+}
+
+function moveCategory(index, direction) {
+  if (index + direction >= 0 && index + direction < portfolioData.length) {
+    const temp = portfolioData[index];
+    portfolioData[index] = portfolioData[index + direction];
+    portfolioData[index + direction] = temp;
+    renderAdmin();
+  }
+}
+
+// JSON Dışa Aktarma
+function saveData() {
+  const jsonString = JSON.stringify(portfolioData, null, 2);
+  const blob = new Blob([jsonString], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  
+  const link = document.getElementById('downloadLink');
+  link.href = url;
+  link.download = "data.json";
+  
+  document.getElementById('downloadArea').style.display = 'block';
+  link.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+window.onload = loadData;
+</script>
+
+</body>
+</html>

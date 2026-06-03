@@ -20,6 +20,7 @@
     --text-dim: #64748b;
     --border: rgba(0, 0, 0, 0.06); /* Beyaz temada sınırları belirginleştiren ince kenarlık */
     --shadow: rgba(20, 184, 166, 0.08);
+    --icon: #14b8a6;
   }
 
   body.dark {
@@ -64,7 +65,7 @@
     border-radius: 50%;
     filter: blur(120px);
     z-index: -1;
-    opacity: 0.25;
+    opacity: 0.25; /* Beyaz temada camın arkasındaki renklerin daha çok belli olması için artırıldı */
     pointer-events: none;
   }
   body::before {
@@ -73,32 +74,14 @@
   }
   body::after {
     bottom: -100px; right: -100px;
-    background: #8b5cf6;
-  }
-
-  /* KOD YAĞMURU CANVAS */
-  #codeCanvas {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    z-index: -1;
-    pointer-events: none;
-    opacity: 1;
-  }
-
-  /* CONTROLS PANEL - dikey sütun, sağ üst */
-  .controls-panel {
-    position: fixed;
-    top: 20px;
-    right: 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    z-index: 99999;
+    background: #8b5cf6; /* Mor tonu */
   }
 
   /* THEME TOGGLE */
   .theme-toggle {
+    position: fixed;
+    top: 30px;
+    right: 20px;
     width: 44px; height: 44px;
     border-radius: 12px;
     border: 1px solid var(--border);
@@ -107,17 +90,20 @@
     backdrop-filter: blur(10px);
     box-shadow: 0 4px 15px var(--shadow);
     display: flex; align-items: center; justify-content: center;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 10001; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  .theme-toggle:hover { transform: translateX(-2px); border-color: var(--primary); }
+  .theme-toggle:hover { transform: translateY(-2px); border-color: var(--primary); }
   .theme-toggle i { color: var(--primary); font-size: 20px; }
 
   /* LANGUAGE TOGGLE */
   .language-toggle {
+    position: fixed;
+    top: 30px;
+    right: 80px;
     display: flex;
-    flex-direction: column;
     gap: 8px;
+    z-index: 10001;
   }
 
   .language-toggle button {
@@ -134,7 +120,7 @@
     transition: all 0.3s ease;
   }
 
-  .language-toggle button:hover { transform: translateX(-2px); border-color: var(--primary); }
+  .language-toggle button:hover { transform: translateY(-2px); border-color: var(--primary); }
   .language-toggle button.active {
     background: var(--primary);
     color: white;
@@ -289,6 +275,15 @@
   .intro p { margin: 12px 0; color: var(--text-dim); font-size: 1.1rem; }
   .intro strong { color: var(--text); }
 
+  .container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 20px;
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto 80px;
+  }
+
   .card {
     background: var(--card-bg);
     border: 1px solid var(--border);
@@ -297,10 +292,8 @@
     backdrop-filter: blur(25px);
     -webkit-backdrop-filter: blur(25px);
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    display: flex; flex-direction: column; justify-content: space-between;
-    height: auto;
-    min-height: 180px;
-    overflow: hidden;
+    display: flex; flex-direction: column; justify-content: center;
+    min-height: 100px;
     box-shadow: 
       0 4px 15px var(--shadow),
       inset 0 0 0 1px rgba(255, 255, 255, 0.2);
@@ -318,153 +311,6 @@
     font-size: 1.1rem; font-weight: 700;
     color: #ffa500; /* Turuncu başlıklar */
     line-height: 1.3;
-  }
-
-  .card-desc {
-    font-size: 0.85rem;
-    color: var(--text-dim);
-    margin: 0 0 12px;
-    line-height: 1.5;
-  }
-
-  /* VIEW TOGGLE BUTONLARI */
-  .view-toggle {
-    max-width: 920px;
-    margin: 0 auto 24px;
-    padding: 0 20px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .view-toggle span {
-    font-size: 0.85rem;
-    color: var(--text-dim);
-    font-weight: 500;
-    margin-right: 4px;
-  }
-
-  .view-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    padding: 8px 16px;
-    border-radius: 12px;
-    border: 1px solid var(--border);
-    background: var(--card-bg);
-    backdrop-filter: blur(10px);
-    color: var(--text-dim);
-    font-size: 0.85rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.25s ease;
-    -webkit-text-fill-color: unset;
-  }
-
-  .view-btn i { font-size: 13px; color: inherit; }
-
-  .view-btn:hover {
-    border-color: var(--primary);
-    color: var(--primary);
-  }
-
-  .view-btn.active {
-    background: var(--primary) !important;
-    color: #fff !important;
-    border-color: var(--primary) !important;
-    box-shadow: 0 4px 12px rgba(20,184,166,0.35);
-  }
-
-  /* GRUP BAŞLIĞI */
-  .group-header {
-    width: 100%;
-    max-width: 1200px;
-    margin: 32px auto 8px;
-    padding: 0 20px;
-    align-items: center;
-    gap: 12px;
-  }
-
-  .group-header h3 {
-    margin: 0;
-    font-size: 1rem;
-    font-weight: 700;
-    color: var(--primary);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .group-header .group-line {
-    flex: 1;
-    min-width: 50px;
-    height: 1px;
-    background: linear-gradient(to right, var(--primary), transparent);
-    opacity: 0.3;
-  }
-
-  /* MAIN GRID WRAPPER (Kart Modunda grid, Kategori modunda block) */
-  .main-grid-wrapper {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
-  }
-
-  /* KATEGORİ MODU (varsayılan 'Kart' Görünümü): 
-     Başlıklar gizli, container'lar içeriklerini bir üst ızgaraya (main-grid-wrapper) aktarır. 
-     Böylece tüm gruplardaki kartlar kesintisiz yan yana dizilir. */
-  body:not(.view-group) .group-header { display: none; }
-  
-  body:not(.view-group) .main-grid-wrapper {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    grid-auto-rows: auto;
-    gap: 20px;
-  }
-
-  body:not(.view-group) .container {
-    display: contents;
-  }
-
-  /* SABİTLENMİŞ KART SIRALAMASI (Sadece Kart Modunda geçerli) */
-  body:not(.view-group) .card.pinned {
-    order: var(--pin-order);
-  }
-
-  /* GRUP MODU ('Kategori' Görünümü) */
-  body.view-group .group-header {
-    display: flex;
-    cursor: pointer;
-    transition: opacity 0.3s ease;
-  }
-  body.view-group .group-header:hover { opacity: 0.8; }
-  
-  .group-header .toggle-icon {
-    color: var(--primary);
-    transition: transform 0.3s ease;
-    font-size: 14px;
-  }
-  .group-header.collapsed .toggle-icon {
-    transform: rotate(180deg);
-  }
-
-  body.view-group .container.collapsed {
-    display: none !important;
-  }
-
-  body.view-group .main-grid-wrapper {
-    display: block;
-    padding: 0;
-  }
-
-  body.view-group .container {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    grid-auto-rows: auto;
-    gap: 20px;
-    padding: 0 20px 20px 20px;
-    max-width: 1200px;
-    margin: 0 auto 10px;
   }
 
   a.github-link {
@@ -538,11 +384,6 @@
     z-index: 9999;
   }
 
-  @media (max-width: 1100px) and (min-width: 769px) {
-    body:not(.view-group) .main-grid-wrapper { grid-template-columns: repeat(2, 1fr); }
-    body.view-group .container { grid-template-columns: repeat(2, 1fr); }
-  }
-
   /* MEDIA QUERIES */
   @media (max-width: 768px) {
     body { padding-left: 0; padding-top: 10px; }
@@ -597,24 +438,16 @@
       border-radius: 20px;
     }
     
-    body:not(.view-group) .main-grid-wrapper { grid-template-columns: 1fr; gap: 15px; padding: 15px; }
-    body.view-group .container { grid-template-columns: 1fr; gap: 15px; padding: 15px; }
-    .card { height: auto; min-height: 180px; padding: 18px; }
+    .container { grid-template-columns: 1fr; gap: 15px; padding: 15px; }
+    .card { min-height: 120px; padding: 18px; }
     
-    .controls-panel { top: 10px; right: 8px; gap: 6px; }
-    .theme-toggle { width: 40px; height: 40px; }
+    .theme-toggle { top: 10px; right: 10px; width: 40px; height: 40px; }
+    .language-toggle { top: 10px; right: 60px; }
     .language-toggle button { width: 40px; height: 40px; }
   }
-  /* ── VIEW BTN OVERRIDE — en sonda, en yüksek öncelik ── */
-  button.view-btn { transition: background 0.25s, border-color 0.25s; }
-  button.view-btn.active { background: #14b8a6 !important; color: #000 !important; border-color: #14b8a6 !important; font-weight: 800 !important; }
-  button.view-btn:not(.active) { color: #94a3b8 !important; }
 </style>
 </head>
 <body class="dark">
-
-<!-- Animated Code Background -->
-<canvas id="codeCanvas"></canvas>
 
 <!-- Player -->
 <div class="player" id="player">
@@ -657,16 +490,16 @@
   </div>
 </div>
 
-<!-- Controls Panel: dil + tema butonları dikey sütun -->
-<div class="controls-panel">
-  <button class="theme-toggle" id="themeToggle" title="Tema Değiştir">
-    <i class="fa-solid fa-sun"></i>
-  </button>
-  <div class="language-toggle">
-    <button id="langTR" class="active">TR</button>
-    <button id="langEN">EN</button>
-  </div>
+<!-- Language toggle -->
+<div class="language-toggle">
+  <button id="langTR" class="active">TR</button>
+  <button id="langEN">EN</button>
 </div>
+
+<!-- Theme toggle -->
+<button class="theme-toggle" id="themeToggle" title="Tema Değiştir">
+  <i class="fa-solid fa-sun"></i>
+</button>
 
 <h1><i class="fa-solid fa-terminal" style="margin-right:24px;"></i>Abdullah Ertürk</h1>
 
@@ -686,20 +519,155 @@
   </div>
 </div>
 
-<!-- Görünüm Seçici -->
-<div class="view-toggle">
-  <span id="viewLabel">Görünüm:</span>
-  <button class="view-btn active" id="btnCategory" onclick="setView('category')" data-tr="Kart" data-en="Card">
-    <i class="fa-solid fa-table-cells"></i> Kart
-  </button>
-  <button class="view-btn" id="btnGroup" onclick="setView('group')" data-tr="Kategori" data-en="Category">
-    <i class="fa-solid fa-layer-group"></i> Kategori
-  </button>
+<div class="container">
+
+<div class="card">
+<h2><i class="fa-solid fa-network-wired"></i> iPXE Manager  - Network HTTP Boot</h2>
+<p><a href="https://github.com/abdullah-erturk/iPXE-Manager" target="_blank" class="github-link"><i class="fa-brands fa-github"></i> GitHub'da Görüntüle</a></p>
 </div>
 
-<!-- ── GRUP BAŞLIKLARI (DİNAMİK RENDER) ── -->
-<div class="main-grid-wrapper" id="portfolio-root">
-  <!-- İçerik JavaScript ile data.json'dan yüklenecek -->
+<div class="card">
+<h2><i class="fa-solid fa-cloud-arrow-down"></i>Acronis True Image 2026 Portable <br>(for Live & WinPE)</h2>
+        <div style="display: flex; gap: 15px; align-items: center; justify-content: flex-start; margin-top: 15px;">
+          <a href="https://mega.nz/folder/tUhznB6T#s9yjwua2YIjf5YhhTKMwIg" class="github-link mega-link" target="_blank" style="margin-top:0;">
+            <i class="fa-solid fa-cloud-arrow-down"></i> Mega Link
+          </a>
+          <a href="Acronis.html" class="info-link" target="_blank">
+            <i class="fa-solid fa-circle-info"></i> Bilgi
+          </a>
+        </div>
+</div>
+
+<div class="card">
+<h2><i class="fa-solid fa-hard-drive"></i> Windows Backup & Restore Tool (C#)</h2>
+<p><a href="https://github.com/abdullah-erturk/Windows-Backup-Restore-Tool" target="_blank" class="github-link"><i class="fa-brands fa-github"></i> GitHub'da Görüntüle</a></p>
+</div>
+
+<div class="card">
+<h2><i class="fa-solid fa-hard-drive"></i> Diskpart GUI </h2>
+<p><a href="https://github.com/abdullah-erturk/Diskpart-GUI" target="_blank" class="github-link"><i class="fa-brands fa-github"></i> GitHub'da Görüntüle</a></p>
+</div>
+
+<div class="card">
+<h2><i class="fa-solid fa-bolt"></i> Academia & Scribd Downloader </h2>
+<p><a href="https://github.com/abdullah-erturk/Academia-Scribd-Downloader" target="_blank" class="github-link"><i class="fa-brands fa-github"></i> GitHub'da Görüntüle</a></p>
+</div>
+
+<div class="card">
+<h2><i class="fa-solid fa-heart-pulse"></i> Ping Monitor Enterprise </h2>
+<p><a href="https://github.com/abdullah-erturk/Ping-Monitor" target="_blank" class="github-link"><i class="fa-brands fa-github"></i> GitHub'da Görüntüle</a></p>
+</div>
+
+<div class="card">
+<h2><i class="fa-solid fa-desktop"></i> RDP (wfreerdp) Connection Tool </h2>
+<p><a href="https://github.com/abdullah-erturk/RDP-wfreerdp-Connection-Tool" target="_blank" class="github-link"><i class="fa-brands fa-github"></i> GitHub'da Görüntüle</a></p>
+</div>
+
+<div class="card">
+<h2><i class="fa-solid fa-network-wired"></i> NetScan — Network Inventory Scanner </h2>
+<p><a href="https://github.com/abdullah-erturk/Network-Inventory-Scanner/" target="_blank" class="github-link"><i class="fa-brands fa-github"></i> GitHub'da Görüntüle</a></p>
+</div>
+
+<div class="card">
+<h2><i class="fa-solid fa-hard-drive"></i> Windows Backup & Recovery Tool (console / cmd)</h2>
+<p><a href="https://github.com/abdullah-erturk/Windows-Backup-Recovery-Tool" target="_blank" class="github-link"><i class="fa-brands fa-github"></i> GitHub'da Görüntüle</a></p>
+</div>
+
+<div class="card">
+<h2><i class="fa-solid fa-lock"></i> Encryption-Decryption Tool</h2>
+<p><a href="https://github.com/abdullah-erturk/Encryption-Decryption-Tool" target="_blank" class="github-link"><i class="fa-brands fa-github"></i> GitHub'da Görüntüle</a></p>
+</div>
+
+<div class="card">
+<h2><i class="fa-solid fa-brain"></i> PMAS</h2>
+<p><a href="https://github.com/abdullah-erturk/pmas" target="_blank" class="github-link"><i class="fa-brands fa-github"></i> GitHub'da Görüntüle</a></p>
+</div>
+
+<div class="card">
+<h2><i class="fa-solid fa-shield-halved"></i> Trusted Installer Launcher</h2>
+<p><a href="https://github.com/abdullah-erturk/Trusted-Installer-Launcher" target="_blank" class="github-link"><i class="fa-brands fa-github"></i> GitHub'da Görüntüle</a></p>
+</div>
+
+<div class="card">
+<h2><i class="fa-brands fa-microsoft"></i> Office 365 Enterprise Offline/Online Installer</h2>
+<p><a href="https://github.com/abdullah-erturk/Office-365-Enterprise-Setup" target="_blank" class="github-link"><i class="fa-brands fa-github"></i> GitHub'da Görüntüle</a></p>
+</div>
+	
+<div class="card">
+<h2><i class="fa-solid fa-puzzle-piece"></i> Acronis Shell Extension</h2>
+<p><a href="https://github.com/abdullah-erturk/Acronis-Shell-Extension" target="_blank" class="github-link"><i class="fa-brands fa-github"></i> GitHub'da Görüntüle</a></p>
+</div>
+
+<div class="card">
+<h2><i class="fa-solid fa-shield-halved"></i> Secure Encode</h2>
+<p><a href="https://github.com/abdullah-erturk/Secure-Encode" target="_blank" class="github-link"><i class="fa-brands fa-github"></i> GitHub'da Görüntüle</a></p>
+</div>
+
+<div class="card">
+<h2><i class="fa-brands fa-windows"></i> WinPE</h2>
+<p><a href="https://github.com/abdullah-erturk/WinPE" target="_blank" class="github-link"><i class="fa-brands fa-github"></i> GitHub'da Görüntüle</a></p>
+</div>
+
+<div class="card">
+<h2><i class="fa-solid fa-compact-disc"></i> Win10 Setup Disk WinToGo</h2>
+<p><a href="https://github.com/abdullah-erturk/Win10-Setup-Disk-WinToGo" target="_blank" class="github-link"><i class="fa-brands fa-github"></i> GitHub'da Görüntüle</a></p>
+</div>
+
+<div class="card">
+<h2><i class="fa-solid fa-broom"></i> Scan &amp; Repair Windows</h2>
+<p><a href="https://github.com/abdullah-erturk/scan_repair_windows" target="_blank" class="github-link"><i class="fa-brands fa-github"></i> GitHub'da Görüntüle</a></p>
+</div>
+
+<div class="card">
+<h2><i class="fa-solid fa-network-wired"></i> NetIPManager</h2>
+<p><a href="https://github.com/abdullah-erturk/NetIPManager" target="_blank" class="github-link"><i class="fa-brands fa-github"></i> GitHub'da Görüntüle</a></p>
+</div>
+
+<div class="card">
+<h2><i class="fa-solid fa-shield-halved"></i> SecureBoot Grub2FM Suite</h2>
+<p><a href="https://github.com/abdullah-erturk/SecureBoot-Grub2FM-Suite" target="_blank" class="github-link"><i class="fa-brands fa-github"></i> GitHub'da Görüntüle</a></p>
+</div>
+
+<div class="card">
+<h2><i class="fa-solid fa-terminal"></i> Ventoy Command Line Installer</h2>
+<p><a href="https://github.com/abdullah-erturk/Ventoy-Command-Line-Installer" target="_blank" class="github-link"><i class="fa-brands fa-github"></i> GitHub'da Görüntüle</a></p>
+</div>
+
+<div class="card">
+<h2><i class="fa-solid fa-layer-group"></i> Ventoy Grub2FM Multiboot With Original Files</h2>
+<p><a href="https://github.com/abdullah-erturk/Ventoy-Grub2FM-Multiboot-With-Original-Files" target="_blank" class="github-link"><i class="fa-brands fa-github"></i> GitHub'da Görüntüle</a></p>
+</div>
+
+<div class="card">
+<h2><i class="fa-solid fa-compact-disc"></i> iPXE ISO EFI MBR SecureBoot Support</h2>
+<p><a href="https://github.com/abdullah-erturk/iPXE-iso-efi-mbr-secureboot-support-" target="_blank" class="github-link"><i class="fa-brands fa-github"></i> GitHub'da Görüntüle</a></p>
+</div>
+
+<div class="card">
+<h2><i class="fa-solid fa-shield-virus"></i> USB HDD Protect</h2>
+<p><a href="https://github.com/abdullah-erturk/USB-HDD_Protect" target="_blank" class="github-link"><i class="fa-brands fa-github"></i> GitHub'da Görüntüle</a></p>
+</div>
+
+<div class="card">
+<h2><i class="fa-solid fa-id-card"></i> RustDesk ID Changer</h2>
+<p><a href="https://github.com/abdullah-erturk/RustDesk-ID-Changer" target="_blank" class="github-link"><i class="fa-brands fa-github"></i> GitHub'da Görüntüle</a></p>
+</div>
+
+<div class="card">
+<h2><i class="fa-solid fa-volume-xmark"></i> RustDesk Silent Installation</h2>
+<p><a href="https://github.com/abdullah-erturk/RustDesk-Silent-Installation" target="_blank" class="github-link"><i class="fa-brands fa-github"></i> GitHub'da Görüntüle</a></p>
+</div>
+
+<div class="card">
+<h2><i class="fa-solid fa-microchip"></i> HardwareInfo</h2>
+<p><a href="https://github.com/abdullah-erturk/HardwareInfo" target="_blank" class="github-link"><i class="fa-brands fa-github"></i> GitHub'da Görüntüle</a></p>
+</div>
+
+<div class="card">
+<h2><i class="fa-solid fa-gears"></i> Windows Update Pause Resume</h2>
+<p><a href="https://github.com/abdullah-erturk/Windows-Update-Pause-Resume" target="_blank" class="github-link"><i class="fa-brands fa-github"></i> GitHub'da Görüntüle</a></p>
+</div>
+
 </div>
 
 <script>
@@ -767,25 +735,10 @@ function applyLanguage(lang){
   const hb = document.getElementById('historyBtnText');
   if(hb) hb.textContent = t.historyBtn;
 
-  // Kart açıklamalarını güncelle
-  document.querySelectorAll('.card-desc').forEach(el => {
-    el.textContent = el.getAttribute('data-' + lang) || '';
-  });
-
-  // Grup başlıklarını güncelle
-  document.querySelectorAll('.group-header h3 span[data-tr]').forEach(el => {
-    el.textContent = el.getAttribute('data-' + lang) || '';
-  });
-
-  // Görünüm butonlarının metnini güncelle
-  document.querySelectorAll('.view-btn[data-tr]').forEach(el => {
-    const icon = el.querySelector('i').outerHTML;
-    el.innerHTML = icon + ' ' + el.getAttribute('data-' + lang);
-  });
-  document.getElementById('viewLabel').textContent = lang === 'tr' ? 'Görünüm:' : 'View:';
-
 	document.querySelectorAll('.github-link').forEach(el => {
+	  // Mega link ise hem yazıyı hem ikonu değiştirme
 	  if(el.classList.contains('mega-link')) return;
+
 	  el.innerHTML = `<i class="fa-brands fa-github"></i> ${t.githubLink}`;
 	});
     document.querySelectorAll('.info-link').forEach(el => {
@@ -801,115 +754,9 @@ function applyLanguage(lang){
   if(ct.textContent.includes('Bekleniyor') || ct.textContent.includes('Waiting')) ct.textContent = t.playerWaiting;
 }
 
-// Görünüm Geçişi — CSS class tabanlı, DOM taşıma yok
-let currentView = 'category';
-
-function setView(mode) {
-  currentView = mode;
-  const btnCat = document.getElementById('btnCategory');
-  const btnGrp = document.getElementById('btnGroup');
-
-  btnCat.classList.toggle('active', mode === 'category');
-  btnGrp.classList.toggle('active', mode === 'group');
-
-  if (mode === 'category') {
-    document.body.classList.remove('view-group');
-  } else {
-    document.body.classList.add('view-group');
-  }
-  applyLanguage(currentLang);
-}
-
-
 langTR.addEventListener('click',()=>applyLanguage('tr'));
 langEN.addEventListener('click',()=>applyLanguage('en'));
 applyLanguage(currentLang);
-
-// Dinamik Veri Yükleme ve Render (data.json)
-async function loadPortfolio() {
-  try {
-    const res = await fetch('data.json', { cache: 'no-cache' });
-    const data = await res.json();
-    const root = document.getElementById('portfolio-root');
-    let html = '';
-    
-    const esc = str => (str || '').replace(/"/g, '&quot;');
-
-    data.forEach(category => {
-      // Kategori Başlığı
-      html += `
-        <div class="group-header" id="gh-${category.id}">
-          <h3><i class="${category.icon}"></i> <span data-tr="${esc(category.title_tr)}" data-en="${esc(category.title_en)}"></span></h3>
-          <i class="fa-solid fa-chevron-up toggle-icon"></i>
-          <div class="group-line"></div>
-        </div>
-        <div class="container" id="grp-${category.id}" data-grp="${category.id}">
-      `;
-
-      // Kartlar
-      category.cards.forEach(card => {
-        let pinClass = card.pinOrder ? 'pinned' : '';
-        let pinStyle = card.pinOrder ? `style="--pin-order: ${-1000 + parseInt(card.pinOrder)}"` : '';
-        let cardIdAttr = card.id ? `id="${card.id}"` : '';
-        html += `
-          <div class="card ${pinClass}" ${cardIdAttr} ${pinStyle} data-group="${category.id}">
-            <h2><i class="${card.icon}"></i> ${card.title}</h2>
-            <p class="card-desc" data-tr="${esc(card.desc_tr)}" data-en="${esc(card.desc_en)}"></p>
-        `;
-        
-        // Linkler
-        if (card.links && card.links.length > 0) {
-          html += `<div style="display:flex;gap:15px;align-items:center;flex-wrap:wrap;">`;
-          card.links.forEach(link => {
-            if (link.type === 'github') {
-              html += `<a href="${link.url}" target="_blank" class="github-link"></a>`;
-            } else if (link.type === 'mega') {
-              html += `<a href="${link.url}" class="github-link mega-link" target="_blank"><i class="fa-solid fa-cloud-arrow-down"></i> ${link.text}</a>`;
-            } else if (link.type === 'info') {
-              html += `<a href="${link.url}" class="info-link" target="_blank"><i class="fa-solid fa-circle-info"></i> Bilgi</a>`;
-            }
-          });
-          html += `</div>`;
-        } else {
-          // Geriye dönük uyumluluk için, veri yoksa boş bırak
-        }
-        
-        html += `</div>`;
-      });
-      
-      html += `</div>`; // .container sonu
-    });
-
-    root.innerHTML = html;
-
-    // Dinamik içerik eklendikten sonra dili tekrar uygula
-    applyLanguage(currentLang);
-    
-    // Kategori Başlıkları Açılır/Kapanır (Spoiler) Özelliği - Event Dinleyicilerini Yeniden Ekle
-    document.querySelectorAll('.group-header').forEach(header => {
-      header.addEventListener('click', () => {
-        if(currentView === 'group') {
-          header.classList.toggle('collapsed');
-          const container = header.nextElementSibling;
-          if(container && container.classList.contains('container')) {
-            container.classList.toggle('collapsed');
-          }
-        }
-      });
-    });
-
-  } catch(err) {
-    console.error('Portfolio verisi yüklenemedi:', err);
-    document.getElementById('portfolio-root').innerHTML = 
-      '<p style="text-align:center;color:#ef4444;padding:40px">Projeler yüklenemedi. Lütfen sayfayı yenileyin.</p>';
-  }
-}
-
-// Başlangıçta verileri yükle
-loadPortfolio();
-
-// Başlangıçta buton renklerini düzelt
-setView('category');
 
 
 
@@ -1102,157 +949,16 @@ audio.addEventListener('ended',()=>{
   playCurrent();
 });
 
-// ── KOD YAĞMURU ANİMASYONU ──────────────────────────────────────────
-(function() {
-  const canvas = document.getElementById('codeCanvas');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-
-  const snippets = [
-    '@echo off','setlocal enabledelayedexpansion','set /a count+=1',
-    'for /f "tokens=*" %%i in (list.txt) do (','  call :process "%%i"',
-    'if errorlevel 1 goto :error','xcopy /s /e /y "%src%" "%dst%"',
-    'reg add HKLM\\SOFTWARE\\App /v Version /t REG_SZ',
-    'net use Z: \\\\server\\share /persistent:yes',
-    'wmic diskdrive get model,size,status',
-    'ipconfig /flushdns','taskkill /f /im explorer.exe',
-    'sc config wuauserv start= disabled',
-    'Get-Process | Where-Object {$_.CPU -gt 10}',
-    'Set-ExecutionPolicy RemoteSigned -Force',
-    'Invoke-WebRequest -Uri $url -OutFile $path',
-    '$env:COMPUTERNAME','Write-Host "Loading..." -ForegroundColor Cyan',
-    'Get-WmiObject Win32_DiskDrive | Select-Object Name,Size',
-    'Start-Service -Name "Spooler"',
-    'foreach ($item in $list) {','  Write-Output $item.Name','}',
-    'param([string]$Path,[switch]$Force)',
-    'if ($_.Status -eq "Running") { Stop-Process $_ }',
-    'Export-Csv -Path output.csv -NoTypeInformation',
-    '[System.IO.File]::ReadAllText($path)',
-    'WScript.Echo "Process complete"',
-    'Set objShell = CreateObject("WScript.Shell")',
-    'objFSO.FileExists(strPath)','Set ws = WScript.CreateObject("WScript.Shell")',
-    '#!ipxe','dhcp','chain http://192.168.1.1/boot/menu.ipxe',
-    'set base-url http://192.168.1.1/os','imgload bzImage',
-    'initrd initramfs.cpio.gz','boot',
-    'diskpart','list disk','select disk 0',
-    'create partition primary size=102400',
-    'format fs=ntfs quick label="System"',
-    'assign letter=C','active',
-    'bcdedit /set {default} safeboot minimal',
-    'sfc /scannow','DISM /Online /Cleanup-Image /RestoreHealth',
-    'netsh int ip reset resetlog.txt',
-    'bootsect /nt60 C: /mbr',
-    'reg query HKCU\\Software\\Microsoft\\Windows',
-    'Get-NetAdapter | Select-Object Name,Status,LinkSpeed',
-    'Test-NetConnection -ComputerName server -Port 443',
-    'Resolve-DnsName google.com','netstat -ano | findstr :3389',
-    'arp -a','route print','ping -t 192.168.1.1',
-  ];
-
-  const LINE_H   = 18;   // satırlar arası piksel
-  const GAP_MIN  = 3;    // bloklar arası min boş satır
-  const GAP_MAX  = 5;    // bloklar arası max boş satır
-  const BLOCK_MIN = 4;   // bir blokta min satır
-  const BLOCK_MAX = 9;   // bir blokta max satır
-  const COL_W    = 72;   // sütun genişliği (daha sık)
-  let cols = [];
-
-  function rnd(a,b){ return a + Math.floor(Math.random()*(b-a+1)); }
-
-  function makeBlock() {
-    const lines = [];
-    const count = rnd(BLOCK_MIN, BLOCK_MAX);
-    for (let i = 0; i < count; i++) {
-      lines.push(snippets[Math.floor(Math.random() * snippets.length)]);
-    }
-    return lines;
-  }
-
-  // Her sütun: birden fazla blok içeren uzun bir metin şeridi
-  function makeStream(scatter) {
-    const blocks = [];
-    let totalH = 0;
-    // Ekranı 2-3 kat aşacak kadar blok oluştur
-    while (totalH < canvas.height * 2.5) {
-      const block = makeBlock();
-      const gap   = rnd(GAP_MIN, GAP_MAX);
-      blocks.push({ lines: block, gap });
-      totalH += (block.length + gap) * LINE_H;
-    }
-    return {
-      x: 0, // buildCols'da set edilecek
-      y: scatter ? (Math.random() * -canvas.height * 1.5) : (-canvas.height * 0.2 - Math.random() * canvas.height),
-      speed: 0.8 + Math.random() * 0.9,
-      alpha: 0.20 + Math.random() * 0.25,
-      size: 11 + Math.floor(Math.random() * 3),
-      isPrimary: Math.random() > 0.38,
-      blocks,
-    };
-  }
-
-  function buildCols() {
-    cols = [];
-    const n = Math.ceil(canvas.width / COL_W) + 1;
-    for (let i = 0; i < n; i++) {
-      const s = makeStream(true);
-      s.x = i * COL_W + Math.random() * (COL_W * 0.4);
-      cols.push(s);
-    }
-  }
-
-  function resize() {
-    canvas.width  = window.innerWidth;
-    canvas.height = window.innerHeight;
-    buildCols();
-  }
-
-  function drawStream(s, isDark) {
-    const color = s.isPrimary
-      ? (isDark ? '20,184,166'  : '13,148,136')
-      : (isDark ? '139,92,246' : '109,40,217');
-
-    ctx.globalAlpha = s.alpha;
-    ctx.fillStyle   = `rgb(${color})`;
-    ctx.font        = `${s.size}px Consolas,"Courier New",monospace`;
-
-    let y = s.y;
-    s.blocks.forEach(blk => {
-      blk.lines.forEach(line => {
-        if (y > -LINE_H && y < canvas.height + LINE_H) {
-          ctx.fillText(line, s.x, y);
-        }
-        y += LINE_H;
-      });
-      y += blk.gap * LINE_H; // boşluk
-    });
-  }
-
-  function draw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    const isDark = document.body.classList.contains('dark');
-
-    cols.forEach((s, i) => {
-      drawStream(s, isDark);
-      s.y += s.speed;
-
-      // En son bloğun sonu ekranın çok altına geçtiyse sıfırla
-      let totalH = 0;
-      s.blocks.forEach(b => { totalH += (b.lines.length + b.gap) * LINE_H; });
-      if (s.y > canvas.height + 60) {
-        const fresh = makeStream(false);
-        fresh.x = s.x;
-        cols[i] = fresh;
-      }
-    });
-
-    ctx.globalAlpha = 1;
-    requestAnimationFrame(draw);
-  }
-
-  window.addEventListener('resize', resize);
-  resize();
-  draw();
-})();
+// File input
+const fileInput=document.getElementById('fileInput');
+fileInput.addEventListener('change', e=>{
+  const files=Array.from(e.target.files);
+  files.forEach(f=>{
+    tracks.push(URL.createObjectURL(f));
+  });
+  renderPlaylist();
+  if(!isPlaying){ currentIndex=tracks.length-files.length; playCurrent();}
+});
 
 </script>
 
