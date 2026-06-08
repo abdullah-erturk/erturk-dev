@@ -1,0 +1,1900 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>iPXE Manager — Demo</title>
+	<link rel="icon" type="image/png" href="/pxe/TOOLS/ipxe.png">
+	<link rel="shortcut icon" href="/pxe/TOOLS/ipxe.png" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        :root { --primary: #14b8a6; --primary-dark: #0d9488; --bg: #f8fafc; --card-bg: rgba(255, 255, 255, 0.7); --text: #1e293b; --text-dim: #64748b; --border: rgba(0, 0, 0, 0.06); --shadow: rgba(20, 184, 166, 0.1); --danger: #ef4444; }
+        body.dark { --bg: #0b0f19; --card-bg: rgba(255, 255, 255, 0.05); --text: #f1f5f9; --text-dim: #94a3b8; --shadow: rgba(0, 0, 0, 0.3); --border: rgba(255, 255, 255, 0.1); }
+        * { box-sizing: border-box; }
+        html, body { height: 100%; margin: 0; padding: 0; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); transition: all 0.4s ease; display: flex; }
+        /* ── SCROLLBAR ── */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--primary-dark); }
+        * { scrollbar-width: thin; scrollbar-color: var(--primary) var(--bg); }
+
+        /* ── SIDEBAR ── */
+        .sidebar {
+            width: 280px; height: 100vh;
+            background: var(--card-bg); backdrop-filter: blur(20px);
+            border-right: 1px solid var(--border);
+            padding: 30px 20px;
+            display: flex; flex-direction: column;
+            position: fixed; z-index: 1001;
+            overflow-y: auto;          /* düşük yükseklikte scroll */
+            transition: transform 0.35s ease;
+        }
+        .sidebar-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 40px; flex-shrink: 0; }
+        .sidebar-logo { font-size: 22px; font-weight: 800; color: var(--primary); display: flex; align-items: center; gap: 10px; }
+        .nav-links { list-style: none; padding: 0; margin: 0; flex-shrink: 0; }
+        .nav-links a { text-decoration: none; color: var(--text-dim); padding: 12px 18px; border-radius: 12px; display: flex; align-items: center; gap: 12px; font-weight: 500; transition: all 0.3s ease; font-size: 14px; margin-bottom: 5px; }
+        .nav-links a:hover, .nav-links a.active { background: var(--primary); color: white; box-shadow: 0 4px 15px var(--shadow); }
+        .sidebar-controls { margin-top: 10px; padding: 15px; background: rgba(20, 184, 166, 0.05); border-radius: 16px; border: 1px solid var(--border); flex-shrink: 0; }
+        .control-group { margin-bottom: 15px; }
+        .control-group label { display: block; font-size: 11px; font-weight: 700; color: var(--text-dim); margin-bottom: 8px; }
+        .service-btn { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--border); cursor: pointer; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.3s ease; background: var(--bg); color: var(--text); }
+        .service-btn.running { background: var(--danger); color: white; border: none; }
+        .service-btn.stopped { background: var(--primary); color: white; border: none; }
+        .btn-sidebar-save { width: 100%; margin-top: 15px; padding: 12px; border-radius: 12px; border: 1px solid var(--primary); background: transparent; color: var(--primary); font-weight: 700; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .btn-sidebar-save:hover { background: var(--primary); color: white; }
+        .btn-exit { margin-top: 15px; width: 100%; padding: 12px; border-radius: 12px; border: 1px solid rgba(239, 68, 68, 0.2); background: rgba(239, 68, 68, 0.05); color: #ef4444; cursor: pointer; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.3s ease; flex-shrink: 0; }
+        .btn-exit:hover { background: #ef4444; color: white; }
+        .lang-select { width: 100%; background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 8px; border-radius: 8px; outline: none; }
+
+        /* ── HAMBURGER ── */
+        .hamburger {
+            display: none; position: fixed; top: 16px; left: 16px; z-index: 1100;
+            background: var(--primary); color: white;
+            border: none; border-radius: 10px; width: 42px; height: 42px;
+            font-size: 18px; cursor: pointer; align-items: center; justify-content: center;
+            box-shadow: 0 4px 14px var(--shadow);
+        }
+        .sidebar-overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.45); z-index: 1000; backdrop-filter: blur(4px);
+        }
+        .sidebar-overlay.active { display: block; }
+
+        /* ── MAIN ── */
+        .main-content { flex: 1; margin-left: 280px; padding: 40px; height: 100vh; overflow-y: auto; position: relative; display: flex; flex-direction: column; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 15px; margin-bottom: 30px; }
+        .stat-card { background: var(--card-bg); backdrop-filter: blur(15px); border: 1px solid var(--border); padding: 20px; border-radius: 20px; box-shadow: 0 10px 30px var(--shadow); }
+        .stat-card h3 { font-size: 12px; color: var(--text-dim); margin-bottom: 8px; }
+        .stat-card .value { font-size: 24px; font-weight: 800; color: var(--primary); }
+        .content-card { background: var(--card-bg); backdrop-filter: blur(20px); border: 1px solid var(--border); padding: 30px; border-radius: 28px; }
+        .table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .header-actions { display: flex; gap: 10px; }
+        .btn { padding: 10px 20px; border-radius: 12px; border: none; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 8px; transition: 0.3s; }
+        .btn-primary { background: var(--primary); color: white; }
+        table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+        th { text-align: left; padding: 15px; color: var(--text-dim); border-bottom: 1px solid var(--border); font-size: 13px; }
+        td { padding: 15px; border-bottom: 1px solid var(--border); font-size: 14px; word-break: break-word; }
+        table th:nth-child(1), table td:nth-child(1) { width: 36px; padding-right: 0; }
+        table th:nth-child(2), table td:nth-child(2) { width: 28%; }
+        table th:nth-child(4), table td:nth-child(4) { width: 140px; }
+        table th:nth-child(5), table td:nth-child(5) { width: 130px; }
+        .edit-icon { font-size: 14px; color: var(--primary); cursor: pointer; opacity: 0; margin-left: 12px; transition: 0.2s; padding: 4px 6px; border-radius: 4px; }
+        tr:hover .edit-icon { opacity: 1; }
+        /* Global operation lock */
+        body.app-busy #standardUploadBtn,
+        body.app-busy #modifiedWinpeBtn,
+        body.app-busy .action-btn {
+            pointer-events: none !important;
+            opacity: 0.35 !important;
+            cursor: not-allowed !important;
+        }
+        
+        /* Drag and Drop */
+        tr[draggable] { cursor: grab; transition: background 0.2s; }
+        tr[draggable]:active { cursor: grabbing; }
+        tr.drag-over { background: rgba(20,184,166,0.12); border: 1px dashed var(--primary); }
+        .drag-handle { color: var(--text-dim); font-size: 14px; cursor: grab; padding-right: 8px; opacity: 0.5; }
+        tr:hover .drag-handle { opacity: 1; }
+        
+        /* Default star */
+        .btn-set-default { background: none; border: none; cursor: pointer; font-size: 15px; color: var(--text-dim); padding: 0 4px; transition: color 0.2s; }
+        .btn-set-default.active { color: #f59e0b; }
+        .btn-set-default:hover { color: #f59e0b; }
+        tr:hover .edit-icon { opacity: 1; background: var(--hover-bg, rgba(0,0,0,0.05)); }
+        
+        /* Yeni Grup Stilleri */
+        .group-title { font-size: 15px; color: var(--text-dim); margin: 30px 0 15px 0; font-weight: 800; border-bottom: 1px solid var(--border); padding-bottom: 10px; display: flex; align-items: center; }
+        .group-title:first-child { margin-top: 0; }
+        .group-table-wrap { margin-bottom: 20px; }
+
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 2000; }
+        .modal { background: var(--bg); padding: 40px; border-radius: 32px; width: 450px; border: 1px solid var(--border); box-shadow: 0 30px 70px rgba(0,0,0,0.4); }
+        .modal input { width: 100%; padding: 16px; margin-bottom: 25px; border-radius: 16px; border: 1px solid var(--border); background: var(--bg); color: var(--text); outline: none; }
+        .error-text { color: var(--danger); font-size: 13px; margin-top: -20px; margin-bottom: 20px; display: none; font-weight: 700; }
+
+        /* ── TOAST + PROGRESS BAR ── */
+        #toast {
+            position: fixed; bottom: 30px; right: 40px;
+            background: var(--primary); color: white;
+            padding: 15px 22px 0 22px;
+            border-radius: 14px;
+            transform: translateY(150px); transition: 0.4s ease; z-index: 10000;
+            display: flex; flex-direction: column;
+            min-width: 280px; max-width: 380px;
+            font-weight: 600;
+            box-shadow: 0 8px 30px rgba(20,184,166,0.35);
+            overflow: hidden;
+        }
+        .toast-row { display: flex; align-items: center; gap: 12px; padding-bottom: 14px; }
+        #toastProgressWrap {
+            width: 100%; height: 4px;
+            background: rgba(255,255,255,0.25);
+            border-radius: 0 0 14px 14px;
+            overflow: hidden;
+            display: none;
+            margin: 0 -22px;
+            width: calc(100% + 44px);
+        }
+        #toastProgressBar {
+            height: 100%; width: 0%;
+            background: white;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .footer { margin-top: auto; padding-top: 60px; text-align: center; font-size: 12px; color: var(--text-dim); opacity: 0.7; }
+        .footer a { color: var(--primary); text-decoration: none; font-weight: 600; }
+
+        /* Shutdown Modal */
+        #shutdownModal .modal { text-align: center; padding: 50px 40px 40px; width: 360px; }
+        .shutdown-icon-wrap { width: 90px; height: 90px; border-radius: 50%; background: rgba(239,68,68,0.1); display: flex; align-items: center; justify-content: center; margin: 0 auto 28px; animation: pulse-red 2s infinite; }
+        .shutdown-icon-wrap i { font-size: 38px; color: #ef4444; }
+        @keyframes pulse-red { 0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,0.25)} 50%{box-shadow:0 0 0 14px rgba(239,68,68,0)} }
+        #shutdownModal h2 { font-size: 22px; font-weight: 800; margin: 0 0 10px; }
+        #shutdownModal p { font-size: 14px; color: var(--text-dim); margin: 0 0 32px; line-height: 1.6; }
+        .shutdown-btns { display: flex; gap: 12px; }
+        .btn-cancel-sd { flex:1; padding:14px; border-radius:14px; border:1px solid var(--border); background:var(--card-bg); color:var(--text); font-size:14px; font-weight:700; cursor:pointer; transition:all 0.3s; }
+        .btn-cancel-sd:hover { background: var(--border); }
+        .btn-confirm-sd { flex:1; padding:14px; border-radius:14px; border:none; background:#ef4444; color:white; font-size:14px; font-weight:700; cursor:pointer; transition:all 0.3s; display:flex; align-items:center; justify-content:center; gap:8px; }
+        .btn-confirm-sd:hover { background:#dc2626; transform:translateY(-1px); box-shadow:0 6px 20px rgba(239,68,68,0.35); }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 900px) {
+            .hamburger { display: flex; }
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); }
+            .main-content { margin-left: 0; padding: 70px 20px 30px; }
+        }
+        @media (max-width: 600px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .modal { width: calc(100vw - 30px); padding: 28px 20px; }
+            #toast { left: 15px; right: 15px; bottom: 20px; min-width: unset; }
+            table th:nth-child(3), table td:nth-child(3) { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Hamburger (mobil) -->
+    <button class="hamburger" id="hamburgerBtn" onclick="toggleSidebar()" aria-label="Menü">
+        <i class="fa-solid fa-bars" id="hamburgerIcon"></i>
+    </button>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo"><i class="fa-solid fa-server"></i><span>iPXE Manager</span></div>
+            <button style="border:none; background:none; color:var(--primary); cursor:pointer; font-size: 18px;" onclick="toggleTheme()" id="themeBtn"><i class="fa-solid fa-moon"></i></button>
+        </div>
+        <ul class="nav-links">
+            <li><a href="#" class="active" onclick="loadCategory('ALL');closeSidebar()"><i class="fa-solid fa-house"></i> <span data-i18n="nav_dashboard">Kontrol Paneli</span></a></li>
+            <li><a href="#" onclick="loadCategory('ISO_WIN');closeSidebar()"><i class="fa-brands fa-windows"></i> <span data-i18n="nav_iso_win_mgmt">Windows ISO</span></a></li>
+            <li><a href="#" onclick="loadCategory('ISO_LINUX');closeSidebar()"><i class="fa-brands fa-linux"></i> <span data-i18n="nav_iso_linux_mgmt">Linux ISO</span></a></li>
+            <li><a href="#" onclick="loadCategory('WIM');closeSidebar()"><i class="fa-solid fa-hard-drive"></i> <span data-i18n="nav_wim_mgmt">WIM Yönetimi</span></a></li>
+            <li><a href="#" onclick="showDhcp();closeSidebar()" id="nav-dhcp"><i class="fa-solid fa-network-wired"></i> <span data-i18n="nav_dhcp_config">DHCP / Firewall Konfigürasyonu</span></a></li>
+        </ul>
+        <div class="sidebar-controls">
+            <div class="control-group"><label data-i18n="nav_lang">Dil</label>
+                <select class="lang-select" onchange="selectLanguage(this.value)" id="langSelect"></select>
+            </div>
+            <div class="control-group"><label data-i18n="nav_server_ip">Sunucu IP</label><input type="text" class="lang-select" id="serverIP"></div>
+            <div class="control-group"><label data-i18n="nav_service_control">Servis</label>
+                <button class="service-btn" id="serviceBtn" onclick="toggleServer()"><i class="fa-solid fa-play" id="serviceIcon"></i> <span id="serviceText">Başlat</span></button>
+            </div>
+        </div>
+        <button class="btn-sidebar-save" onclick="saveSettings()" data-i18n-title="btn_save_hover"><i class="fa-solid fa-floppy-disk"></i> <span data-i18n="btn_save">Kaydet</span></button>
+        <button class="btn-sidebar-save" onclick="showPwdModal()" style="margin-top:8px; border-color:var(--text-dim); color:var(--text-dim);" id="pwdBtn"><i class="fa-solid fa-key"></i> <span data-i18n="nav_password_set" id="pwdBtnText">Şifre Ayarla</span></button>
+        <button class="btn-sidebar-save" onclick="installService()" style="margin-top:8px; border-color:var(--text-dim); color:var(--text-dim);" id="srvInstallBtn"><i class="fa-solid fa-cogs"></i> <span data-i18n="nav_service_install" id="srvInstallText">Hizmet Olarak Yükle</span></button>
+        <button class="btn-sidebar-save" onclick="doLogout()" style="margin-top:8px; border-color:#ef4444; color:#ef4444; display:none;" id="logoutBtn"><i class="fa-solid fa-right-from-bracket"></i> <span data-i18n="nav_logout">Oturumu Kapat</span></button>
+        <button class="btn-exit" onclick="showShutdownModal()" data-i18n-title="btn_exit_hover"><i class="fa-solid fa-power-off"></i> <span data-i18n="btn_exit">Sistemi Kapat</span></button>
+    </nav>
+
+    <main class="main-content">
+        <div class="stats-grid">
+            <div class="stat-card"><h3 data-i18n="card_total_iso_win">Windows ISO</h3><div class="value" id="countISOWin">0</div></div>
+            <div class="stat-card"><h3 data-i18n="card_total_iso_linux">Linux ISO</h3><div class="value" id="countISOLinux">0</div></div>
+            <div class="stat-card"><h3 data-i18n="card_total_wim">Toplam WIM</h3><div class="value" id="countWIM">0</div></div>
+            <div class="stat-card"><h3 data-i18n="card_server_status">Durum</h3><div class="value" id="serverStatusText">Offline</div></div>
+            <div class="stat-card" onclick="showConnectionsModal()" style="cursor: pointer;"><h3 data-i18n="card_active_sessions">Aktif</h3><div class="value" id="activeConnections">0</div></div>
+        </div>
+        
+        <!-- Boot Settings Card -->
+        <div class="content-card" id="bootSettingsCard" style="margin-bottom:20px; padding:20px 30px;">
+            <div style="display:flex; align-items:center; gap:30px; flex-wrap:wrap;">
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <i class="fa-solid fa-star" style="color:#f59e0b; font-size:16px;"></i>
+                    <label style="font-size:12px; font-weight:700; color:var(--text-dim); white-space:nowrap;" data-i18n="nav_default_boot">Varsayılan Önyükleme</label>
+                    <select class="lang-select" id="defaultBootSelect" onchange="saveBootSettings()" style="min-width:180px; padding:7px 10px;">
+                        <option value="HDD" data-i18n="boot_opt_hdd">Lokal Disk</option>
+                    </select>
+                </div>
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <i class="fa-solid fa-clock" style="color:var(--primary); font-size:16px;"></i>
+                    <label style="font-size:12px; font-weight:700; color:var(--text-dim); white-space:nowrap;" data-i18n="nav_countdown">Geri Sayım (sn)</label>
+                    <input type="number" class="lang-select" id="countdownInput" min="0" max="300" value="10" onchange="saveBootSettings()" onfocus="this.select()" onclick="this.select()" style="width:80px; padding:7px 10px;">
+                    <span style="font-size:11px; color:var(--text-dim);" data-i18n="countdown_hint">0 = Kapalı</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-card" id="mainTableCard">
+            <div class="table-header">
+                <div>
+                    <h2 id="contentTitle">Yükleme</h2>
+                    <p id="contentSubtitle" style="margin:2px 0 0 0;font-size:0.82rem;color:var(--text-dim);display:none;"></p>
+                </div>
+                <div class="header-actions" id="uploadBtnContainer">
+                    <button class="btn btn-primary" id="standardUploadBtn" onclick="triggerUpload()" title="Standart WinPE (.wim) dosyası ekleyin. Yalnızca RAM üzerinde çalışan, dış kaynaklara (ISO/DVD) ihtiyaç duymayan WinPE imajları için." data-i18n-title="tip_upload_standard"><i class="fa-solid fa-plus"></i> <span data-i18n="btn_upload">Yeni Ekle</span></button>
+                    <button class="btn btn-primary" id="modifiedWinpeBtn" style="display:none; background:#f59e0b;" onclick="triggerUpload('WIM_MODIFIED')" title="Sadece RAM üzerinde değil, içinden program çağıran (ISO/DVD bağımlı) modifiye WinPE imajları için (örn. Sergei Strelec). Yalnızca .iso dosyası kabul edilir; ön yükleme sırasında ISO sanal CD olarak bağlanır." data-i18n-title="tip_upload_modified"><i class="fa-solid fa-screwdriver-wrench"></i> <span data-i18n="btn_upload_modified">Modifiye WinPE Ekle</span></button>
+                    <input type="file" id="fileUpload" style="display:none" onchange="handleFile(this)">
+                </div>
+            </div>
+            
+            <!-- Dinamik Tablolar Buraya Eklenecek -->
+            <div id="tablesContainer"></div>
+
+        </div>
+
+        <!-- DHCP Section -->
+        <div id="section-dhcp" style="display:none;">
+            <div class="content-card">
+                <div class="table-header"><h2 data-i18n="dhcp_title">DHCP ve Firewall Konfigürasyonu</h2></div>
+                <div class="dhcp-grid">
+                    <div>
+                        <!-- DHCP KART -->
+                        <p data-i18n="dhcp_desc" style="color:var(--text-dim); margin-bottom:25px; line-height:1.6; font-size:15px;"></p>
+                        <div style="background: rgba(20, 184, 166, 0.05); border-radius: 20px; padding: 25px; border: 1px solid var(--border);">
+                            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;"><div style="width:40px; height:40px; border-radius:12px; background:var(--primary); color:white; display:flex; align-items:center; justify-content:center; font-weight:800;">1</div><div style="font-weight:700; font-size:16px;" data-i18n="dhcp_step1">Sunucu IP Adresini Doğrulayın</div></div>
+                            <label data-i18n="dhcp_server_ip" style="display:block; font-size:11px; font-weight:700; margin-bottom:8px; color:var(--text-dim);"></label>
+                            <input type="text" id="dhcpConfigIP" class="lang-select" style="padding:15px; font-size:16px; margin-bottom:10px; border-color:var(--primary);" oninput="updateDhcpPreview()">
+                            <p style="font-size:12px; color:var(--text-dim); margin-bottom:25px;" data-i18n="dhcp_ip_help"></p>
+                            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;"><div style="width:40px; height:40px; border-radius:12px; background:var(--primary); color:white; display:flex; align-items:center; justify-content:center; font-weight:800;">2</div><div style="font-weight:700; font-size:16px;" data-i18n="dhcp_step2">Scripti İndirin ve Çalıştırın</div></div>
+                            <button class="btn btn-primary" style="width:100%; padding:18px; justify-content:center; font-size:16px;" onclick="downloadDhcpPolicy()"><i class="fa-solid fa-download"></i> <span data-i18n="dhcp_btn_download">Konfigürasyon Dosyasını İndir (.BAT)</span></button>
+                        </div>
+                        
+                        <!-- FIREWALL KART -->
+                        <div style="background: rgba(20, 184, 166, 0.05); border-radius: 20px; padding: 25px; border: 1px solid var(--border); margin-top: 25px;">
+                            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
+                                <div style="width:40px; height:40px; border-radius:12px; background:var(--primary); color:white; display:flex; align-items:center; justify-content:center; font-size: 18px;"><i class="fa-solid fa-shield-halved"></i></div>
+                                <div style="font-weight:700; font-size:16px;" data-i18n="firewall_title">iPXE Sunucusu için Firewall İzin Dosyası</div>
+                            </div>
+                            <p style="font-size:13px; color:var(--text-dim); margin-bottom:20px; line-height: 1.5;" data-i18n="firewall_desc">iPXE sunucusunun sorunsuz çalışması için gerekli HTTP, TFTP ve DHCP portlarını Windows Güvenlik Duvarı'nda açar. Bu dosyayı iPXE sunucusunda (bu makinede) yönetici olarak çalıştırın.</p>
+                            <button class="btn btn-primary" style="width:100%; padding:18px; justify-content:center; font-size:16px;" onclick="downloadFirewallPolicy()">
+                                <i class="fa-solid fa-download"></i> <span data-i18n="firewall_btn_download">Firewall İzin Dosyasını İndir (.BAT)</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="preview-box" style="height:100%; background: rgba(20, 184, 166, 0.05); border: 1px solid var(--border); border-radius: 16px; padding: 20px;">
+                            <h4 style="margin:0 0 15px 0; color:var(--primary); display:flex; align-items:center; gap:10px;"><i class="fa-solid fa-magnifying-glass-chart"></i> <span data-i18n="dhcp_preview_title">Politika Detayları</span></h4>
+                            <p style="font-size:12px; color:var(--text-dim); margin-bottom:15px;" data-i18n="dhcp_preview_desc"></p>
+                            <div style="font-size:13px;">
+                                <div style="margin-bottom:12px; padding-bottom:8px; border-bottom:1px solid var(--border);"><small style="color:var(--text-dim); display:block; margin-bottom:2px;">iPXE Menu URL</small><code id="previewIpxeUrl" style="color:var(--primary); font-weight:700; word-break:break-all;"></code></div>
+                                <div style="margin-bottom:12px; padding-bottom:8px; border-bottom:1px solid var(--border);"><small style="color:var(--text-dim); display:block; margin-bottom:2px;">User Class</small><span style="font-weight:600;">iPXE</span></div>
+                                <div style="margin-bottom:12px; padding-bottom:8px; border-bottom:1px solid var(--border);"><small style="color:var(--text-dim); display:block; margin-bottom:2px;">UEFI Boot File</small><span style="font-weight:600;">bootx64.efi</span></div>
+                                <div style="margin-bottom:12px;"><small style="color:var(--text-dim); display:block; margin-bottom:2px;">BIOS Boot File</small><span style="font-weight:600;">ipxe-legacy.pxe</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <style>.dhcp-grid { display: grid; grid-template-columns: 1fr 350px; gap: 30px; } @media (max-width: 1100px) { .dhcp-grid { grid-template-columns: 1fr; } }</style>
+        </div>
+        <footer class="footer">
+            <div>made by <b><a href="https://buymeacoffee.com/abdullaherturk" target="_blank" style="color:inherit; text-decoration:none;">Abdullah ERTÜRK</a></b></div>
+            <div><a href="https://github.com/abdullah-erturk" target="_blank">github.com/abdullah.erturk</a> | <a href="https://erturk-dev.netlify.app" target="_blank">erturk-dev.netlify.app</a></div>
+        </footer>
+    </main>
+
+    <!-- Modals -->
+    <div class="modal-overlay" id="uploadModal"><div class="modal">
+        <h2 data-i18n="modal_upload_title">Dosya Yükleme</h2>
+        <label data-i18n="modal_alias">Açıklama</label><input type="text" id="modalAlias">
+        <label id="folderLabel" data-i18n="modal_filename">Adı</label><input type="text" id="modalFilename" oninput="validateFilename()">
+        <div id="filenameError" class="error-text" data-i18n="modal_error_space">Boşluk bırakılamaz!</div>
+        <div id="filenameErrorExists" class="error-text" data-i18n="modal_error_exists">Bu isim zaten var!</div>
+        <div style="display:flex; gap:15px;"><button class="btn" style="flex:1" onclick="closeModal('uploadModal')" data-i18n="modal_btn_cancel">İptal</button><button class="btn btn-primary" id="startUploadBtn" style="flex:1" onclick="startUpload()" data-i18n="modal_btn_upload">Yükle</button></div>
+    </div></div>
+
+    <div class="modal-overlay" id="connModal"><div class="modal"><h2 data-i18n="modal_conn_title">Aktif Bağlantılar</h2><div id="connList"></div><button class="btn btn-primary" style="width:100%; margin-top:20px;" onclick="closeModal('connModal')" data-i18n="modal_btn_close">Kapat</button></div></div>
+
+    <div class="modal-overlay" id="extractModal" style="display:none; align-items:center; justify-content:center;">
+        <div class="modal" style="width:520px; max-width:calc(100vw - 30px);">
+            <h2 style="margin:0 0 6px 0; font-size:1.2rem;" data-i18n="modal_extract_title">WIM Çıkarma İşlemi</h2>
+            <p style="margin:0 0 18px 0; font-size:0.85rem; opacity:0.6;" data-i18n="modal_extract_desc">ISO arka planda işleniyor. Bu pencereyi açık tutabilirsiniz.</p>
+            <div id="extractLogBox" style="background:var(--card-bg); border:1px solid var(--border); border-radius:12px; padding:14px; height:220px; overflow-y:auto; font-family:monospace; font-size:0.75rem; line-height:1.6; white-space:pre-wrap; word-break:break-all;"></div>
+            <div style="margin-top:14px; display:flex; align-items:center; gap:10px;">
+                <div id="extractSpinner" style="width:18px; height:18px; border:2px solid var(--border); border-top-color:var(--primary); border-radius:50%; animation:spin 0.8s linear infinite; flex-shrink:0;"></div>
+                <span id="extractStatus" style="font-size:0.85rem; opacity:0.7;" data-i18n="msg_processing">İşlem yapılıyor...</span>
+                <button id="extractCloseBtn" class="btn btn-primary" style="margin-left:auto; display:none; padding:8px 20px;" onclick="closeExtractModal()" data-i18n="modal_btn_close">Kapat</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Log Viewer Modal -->
+    <div class="modal-overlay" id="logModal" style="display:none;align-items:center;justify-content:center;">
+        <div class="modal" style="width:600px;max-width:calc(100vw - 30px);">
+            <h2 style="margin:0 0 14px 0;font-size:1.1rem;" data-i18n="modal_log_title">Extract Log</h2>
+            <pre id="logContent" style="background:var(--card-bg);border:1px solid var(--border);border-radius:10px;padding:14px;height:300px;overflow-y:auto;font-size:0.72rem;line-height:1.6;white-space:pre-wrap;word-break:break-all;margin:0;"></pre>
+            <div style="margin-top:14px;text-align:right;">
+                <button class="btn btn-primary" onclick="closeModal('logModal')" data-i18n="modal_btn_close">Kapat</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Unattend Upload Modal -->
+    <div class="modal-overlay" id="unattendModal" style="display:none;align-items:center;justify-content:center;">
+        <div class="modal" style="width:420px;max-width:calc(100vw - 30px);">
+            <h2 style="margin:0 0 8px 0;font-size:1.1rem;" data-i18n="modal_unattend_title">Upload Unattend XML</h2>
+            <p style="margin:0 0 18px 0;font-size:0.85rem;opacity:0.6;" data-i18n="modal_unattend_desc">Upload an answer file (unattend.xml) for automated Windows installation.</p>
+            <input type="file" id="unattendFile" accept=".xml" style="display:none;" onchange="submitUnattend()">
+            <div style="display:flex;gap:10px;justify-content:flex-end;">
+                <button class="btn" onclick="closeModal('unattendModal')" data-i18n="modal_btn_cancel">İptal</button>
+                <button class="btn btn-primary" onclick="document.getElementById('unattendFile').click()" data-i18n="modal_unattend_browse">Choose XML File</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="shutdownModal"><div class="modal">
+        <div class="shutdown-icon-wrap"><i class="fa-solid fa-power-off"></i></div>
+        <h2 data-i18n="btn_exit"></h2>
+        <p data-i18n="shutdown_confirm_desc"></p>
+        <div class="shutdown-btns">
+            <button class="btn-cancel-sd" onclick="closeModal('shutdownModal')" data-i18n="modal_btn_cancel">İptal</button>
+            <button class="btn-confirm-sd" onclick="confirmShutdown()"><i class="fa-solid fa-power-off"></i> <span data-i18n="btn_exit">Kapat</span></button>
+        </div>
+    </div></div>
+
+    <div id="loginOverlay" style="position:fixed; top:0; left:0; width:100%; height:100%; background:var(--bg); z-index:9999; display:none; align-items:center; justify-content:center; flex-direction:column;">
+        <img src="/pxe/TOOLS/ipxe.png" alt="iPXE Logo" style="width:100px; height:auto; margin-bottom:20px; border-radius:16px;">
+        <div class="modal" style="width:380px; box-shadow:0 20px 50px var(--shadow);">
+            <h2 style="margin-top:0; margin-bottom:25px; text-align:center; font-weight:800; color:var(--text); line-height:1.2;">iPXE Network<br>Boot Manager</h2>
+            <div id="loginError" class="error-text">Invalid username or password!</div>
+            <input type="text" id="loginUsername" placeholder="Username" value="admin" readonly style="opacity:0.7;">
+            <input type="password" id="loginPassword" placeholder="Password" onkeypress="if(event.key==='Enter') doLogin()">
+            <button class="btn btn-primary" style="width:100%; justify-content:center; padding:15px; font-size:16px;" onclick="doLogin()"><i class="fa-solid fa-right-to-bracket"></i> <span>Login</span></button>
+        </div>
+        <div style="margin-top:30px; text-align:center; font-size:13px; color:var(--text-dim); opacity:0.8;">
+            <p style="margin:5px 0; font-weight:600;">made by <a href="https://buymeacoffee.com/abdullaherturk" target="_blank" style="color:inherit; text-decoration:none;">Abdullah ERTÜRK</a></p>
+            <p style="margin:5px 0;"><a href="https://github.com/abdullah.erturk" target="_blank" style="color:var(--primary); text-decoration:none;">github.com/abdullah.erturk</a> | <a href="https://erturk-dev.netlify.app" target="_blank" style="color:var(--primary); text-decoration:none;">erturk-dev.netlify.app</a></p>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="pwdModal"><div class="modal">
+        <h2 style="margin-top:0; margin-bottom:20px; font-weight:800;" data-i18n="modal_pwd_title">Şifre İşlemleri</h2>
+        <div id="pwdError" class="error-text" data-i18n="msg_pwd_error">Mevcut şifre hatalı!</div>
+        <input type="password" id="pwdCurrent" placeholder="Mevcut Şifre" data-i18n-placeholder="modal_pwd_current" style="display:none;">
+        <input type="password" id="pwdNew" placeholder="Yeni Şifre" data-i18n-placeholder="modal_pwd_new">
+        <div style="display:flex; gap:10px; margin-top:10px;">
+            <button class="btn" onclick="closeModal('pwdModal')" style="flex:1; background:var(--card-bg); border:1px solid var(--border); color:var(--text); justify-content:center;" data-i18n="modal_btn_cancel">İptal</button>
+            <button class="btn btn-primary" id="pwdSubmitBtn" onclick="setOrUpdatePassword()" style="flex:1; justify-content:center;" data-i18n="nav_password_ops">Ayarla</button>
+        </div>
+        <button id="pwdRemoveBtn" class="btn" onclick="removePassword()" style="width:100%; justify-content:center; margin-top:10px; background:rgba(239, 68, 68, 0.1); color:#ef4444; border:1px solid rgba(239, 68, 68, 0.2); display:none;" data-i18n="modal_pwd_btn_remove">Şifreyi Kaldır</button>
+    </div></div>
+
+    <!-- Toast: progress bar eklenmiş hali -->
+    <div id="toast">
+        <div class="toast-row">
+            <i class="fa-solid fa-circle-notch fa-spin" id="toastSpinner"></i>
+            <i class="fa-solid fa-check" id="toastCheck"></i>
+            <span id="toastMsg"></span>
+            <span id="toastPct" style="margin-left:auto; font-size:13px; opacity:0.85;"></span>
+        </div>
+        <div id="toastProgressWrap">
+            <div id="toastProgressBar"></div>
+        </div>
+    </div>
+
+    <script>
+/* ═══ iPXE Manager — DEMO MOCK LAYER ═══ */
+(function() {
+    const KEY = 'ipxe_demo_v1';
+    const LANGS = {"English": "[English]\napp_title=iPXE Manager Panel\nnav_dashboard=Dashboard\nnav_iso_win_mgmt=Windows ISO Mgmt\nnav_iso_linux_mgmt=Linux ISO Mgmt\nnav_wim_mgmt=WinPE Management\nnav_lang=Language\nnav_server_ip=Server IP / Domain\nnav_service_control=Service Control\ncard_total_iso_win=Windows ISOs\ncard_total_iso_linux=Linux ISOs\ncard_total_wim=Total WinPE\ncard_server_status=Server Status\ncard_active_sessions=Active Connections\ncard_click_details=Click for details\nbtn_save=Save Settings\nbtn_save_hover=Save Theme, Language and Server IP settings.\nbtn_upload=Add New\nbtn_start_service=Start Service\nbtn_stop_service=Stop Service\nbtn_exit=Shutdown System\nbtn_exit_hover=Safely shutdown the system and all background services.\ntable_name=Folder Name\ntable_alias=Description (Alias)\ntable_size=Size\ntable_date=Date\ntable_action=Action\nmodal_upload_title=File Upload Settings\nmodal_alias=Description (Spaces Allowed)\nmodal_folder_name=Folder Name (Keep folder names short and spaces are forbidden)\nmodal_filename=Filename (No Spaces!)\nmodal_error_space=Spaces are not allowed!\nmodal_error_exists=This name is already in use!\nmodal_btn_cancel=Cancel\nmodal_btn_upload=Start Upload\nmodal_conn_title=Active Connection Details\nmodal_btn_close=Close\nmsg_loading=Uploading, please wait...\nmsg_upload_success=File uploaded successfully!\nmsg_deleted=File deleted.\nmsg_settings_saved=Settings saved and iPXE updated!\nmsg_service_started=PXE Service started.\nmsg_service_stopped=PXE Service stopped.\nmsg_shutdown_confirm=Are you sure you want to shut down the system?\nshutdown_confirm_desc=You are about to shut down the system and all active services.\nshutdown_done_title=System Shut Down\nshutdown_done_desc=The server has been successfully stopped. You can now safely close this window.\nmsg_edit_alias_prompt=Enter New Description (Alias):\nmsg_alias_updated=Name updated.\nstatus_online=Online\nstatus_offline=Offline\nplaceholder_ip=E.g.: 192.168.1.100\nconn_details_active=ONLINE\nconn_details_none=No active connections.\nmsg_processing=Processing...\nmsg_done=Done!\nmsg_settings_saving=Saving...\nmsg_upload_error=Error!\nmsg_no_connections=No active connections.\nmsg_confirm_delete=Are you sure you want to delete this file?\nmsg_updated=Updated!\nnav_password_set=Set Password\nnav_password_ops=Password Settings\nnav_logout=Logout\nnav_service_install=Install as Service\nnav_service_remove=Remove Service\nlogin_title=Dashboard Login\nlogin_username=Username\nlogin_password=Password\nlogin_btn=Login\nlogin_error=Invalid username or password!\nmodal_pwd_title=Set / Update Password\nmodal_pwd_current=Current Password\nmodal_pwd_new=New Password\nmodal_pwd_btn_set=Set / Update Password\nmodal_pwd_btn_remove=Remove Password\nmsg_pwd_updated=Password updated successfully!\nmsg_pwd_removed=Password removed. Login is now public.\nmsg_pwd_error=Current password is incorrect!\nmsg_error=An error occurred!\nmodal_error_empty=This field cannot be empty!\nmodal_error_min6=Password must be at least 6 characters!\nmsg_service_installed=PXE Service installed! It will start automatically on boot.\nmsg_service_removed=PXE Service removed.\nmsg_service_error=Administrator privileges required! Run as admin.\nnav_dhcp_config=DHCP / Firewall Configuration\ndhcp_title=DHCP / iPXE Server Configuration\ndhcp_desc=Use this section if you have an external DHCP Server in your environment. \\n(Applicable to enterprise network environments) \\n\\nYou can download a customized iPXE DHCP policy (.bat) and run it on your Windows DHCP Server. This allows you to create a one-click iPXE Server Policy for your DHCP Server and also enables automatic booting of EFI/BIOS devices.\ndhcp_btn_download=Download Configuration File (.BAT)\ndhcp_server_ip=SERVER IP/DOMAIN ADDRESS\ndhcp_preview_title=Policy Details\ndhcp_policy_name=Policy Name\ndhcp_policy_value=Value\ndhcp_step1=Verify Server IP/Domain Address\ndhcp_step2=Download the script file and run it on the DHCP server.\ndhcp_ip_help=This IP/Domain will be defined as 'Boot Server' (Option 66) in DHCP policies.\ndhcp_preview_desc=The following settings will be automatically added to your DHCP server:\ndhcp_warning=Don't forget to run the file as Administrator on your DHCP server.\nplaceholder_ip=Please enter a valid IP address\ndhcp_msg_template_error=An error occurred while creating the DHCP template!\nnav_default_boot=Default Boot\nboot_opt_hdd=Local Disk\nnav_countdown=Countdown (sec)\ncountdown_hint=0 = Disabled\ntip_set_default=Set as default\ntip_is_default=Default (active)\nfirewall_title=Firewall Permission File for iPXE Server\nfirewall_desc=Opens necessary HTTP, TFTP, and DHCP ports in Windows Firewall for the iPXE server to run smoothly. Run this file as an administrator on the iPXE server.\nfirewall_btn_download=Download Firewall Permission File (.BAT)\nmodal_extract_title=Extracting Process\nmodal_extract_desc=It's being processed in the background. Don't close the browser.\nmsg_wim_extracting=Modified WinPE uploaded. WIM files are being extracted in the background. The menu will update automatically when complete.\nbtn_upload_win=Add Windows ISO\nbtn_upload_linux=Add Linux ISO\nbtn_upload_wim=Add WinPE (.wim)\nbtn_upload_modified=Add Modified WinPE\ntip_upload_win=Add a Windows installation ISO. The ISO will be served over WebDAV for network installation.\ntip_upload_linux=Add a Linux distribution ISO. Kernel and initrd will be extracted automatically.\ntip_upload_standard=Add a standard WinPE (.wim) file. For WinPE images that run entirely in RAM without external dependencies.\ntip_upload_modified=Add a modified WinPE ISO (e.g. Sergei Strelec). The ISO will be mounted over WebDAV so programs inside remain accessible.\ntip_browse_iso=Browse ISO Contents\ntip_view_log=View Extract Log\ntip_upload_unattend=Upload Unattend XML\ntip_drag=Drag to reorder\ntip_edit_alias=Edit description\nmodal_log_title=Extract Log\nmodal_unattend_title=Upload Unattend XML\nmodal_unattend_desc=Upload an answer file for automated Windows installation.\nmodal_unattend_browse=Choose XML File\nmsg_unattend_saved=Unattend XML saved successfully!\nmsg_copying=Copying to disk...\nsubtitle_iso_win=Prefer original Windows ISO (untouched) files.\nsubtitle_iso_linux=⚠ Secure Boot is not supported. Secure Boot must be disabled in UEFI settings for Linux boot. \\n\\n⚠ Some Linux distributions may not be supported. \\n\\n⚠ Ubuntu 24.04+ and Ubuntu Server use a layered squashfs system. The entire ISO must be loaded into RAM during boot. The minimum RAM required is approximately twice the ISO size. \\n\\n⚠ For low RAM environments, Debian 12, Linux Mint, or Ubuntu 22.04 LTS are recommended (a single squashfs file requires ~3–5 GB of RAM).\ngroup_wim=WinPE (WIM)\ngroup_win=Windows Setup (ISO)\ngroup_linux=Linux Setup (ISO)\nbadge_wim_modified=Modified WinPE (ISO)\nmsg_network_error=Network Error!\n", "Turkish": "[Turkish]\napp_title=iPXE Yönetim Paneli\nnav_dashboard=Kontrol Paneli\nnav_iso_win_mgmt=Windows ISO Yönetimi\nnav_iso_linux_mgmt=Linux ISO Yönetimi\nnav_wim_mgmt=WinPE Yönetimi\nnav_lang=Dil / Language\nnav_server_ip=Sunucu IP / Domain\nnav_service_control=Servis Kontrolü\ncard_total_iso_win=Windows ISO\ncard_total_iso_linux=Linux ISO\ncard_total_wim=Toplam WinPE\ncard_server_status=Sunucu Durumu\ncard_active_sessions=Aktif Bağlantılar\ncard_click_details=Detaylar için tıkla\nbtn_save=Ayarları Kaydet\nbtn_save_hover=Tema, Dil ve Sunucu IP ayarlarını kaydet.\nbtn_upload=Yeni Ekle\nbtn_start_service=Servisi Başlat\nbtn_stop_service=Servisi Durdur\nbtn_exit=Sistemi Kapat\nbtn_exit_hover=Sistemi ve tüm servisleri güvenli bir şekilde sonlandırır.\ntable_name=Klasör Adı\ntable_alias=Açıklama (Alias)\ntable_size=Boyut\ntable_date=Tarih\ntable_action=İşlem\nmodal_upload_title=Dosya Yükleme Ayarları\nmodal_alias=Açıklama (Boşluk Serbest)\nmodal_folder_name=Klasör Adı (Klasör adı kısa olmalı ve boşluk olmamalı)\nmodal_filename=Dosya Adı (Boşluk Yasak!)\nmodal_error_space=Boşluk bırakılamaz!\nmodal_error_exists=Bu isim zaten kullanılıyor!\nmodal_btn_cancel=İptal\nmodal_btn_upload=Yüklemeyi Başlat\nmodal_conn_title=Aktif Bağlantı Detayları\nmodal_btn_close=Kapat\nmsg_loading=Yükleniyor, lütfen bekleyin...\nmsg_upload_success=Dosya başarıyla yüklendi!\nmsg_deleted=Dosya silindi.\nmsg_settings_saved=Ayarlar kaydedildi ve iPXE güncellendi!\nmsg_service_started=PXE Servisi başlatıldı.\nmsg_service_stopped=PXE Servisi durduruldu.\nmsg_shutdown_confirm=Sistemi kapatmak istediğinize emin misiniz?\nshutdown_confirm_desc=Sistemi ve tüm aktif servisleri kapatmak üzeresiniz.\nshutdown_done_title=Sistem Kapatıldı\nshutdown_done_desc=Sunucu başarıyla durduruldu. Bu pencereyi artık güvenle kapatabilirsiniz.\nmsg_edit_alias_prompt=Yeni Açıklama (Alias) Giriniz:\nmsg_alias_updated=İsim güncellendi.\nstatus_online=Çevrimiçi\nstatus_offline=Çevrimdışı\nplaceholder_ip=Örn: 192.168.1.100\nconn_details_active=AKTİF\nconn_details_none=Henüz aktif bağlantı yok.\nmsg_processing=İşleniyor...\nmsg_done=Tamamlandı!\nmsg_settings_saving=Ayarlar kaydediliyor...\nmsg_upload_error=Yükleme sırasında bir hata oluştu!\nmsg_no_connections=Aktif bağlantı yok.\nmsg_confirm_delete=Bu dosyayı silmek istediğinize emin misiniz?\nmsg_updated=Güncellendi!\nnav_password_set=Şifre Ayarla\nnav_password_ops=Şifre Güncelle\nnav_logout=Oturumu Kapat\nnav_service_install=Servis Olarak Yükle\nnav_service_remove=Servisi Kaldır\nlogin_title=Yönetim Paneli Girişi\nlogin_username=Kullanıcı Adı\nlogin_password=Şifre\nlogin_btn=Giriş Yap\nlogin_error=Hatalı kullanıcı adı veya şifre!\nmodal_pwd_title=Şifre Ayarla / Güncelle\nmodal_pwd_current=Mevcut Şifre\nmodal_pwd_new=Yeni Şifre\nmodal_pwd_btn_set=Şifre Ayarla / Güncelle\nmodal_pwd_btn_remove=Şifreyi Kaldır\nmsg_pwd_updated=Şifre başarıyla ayarlandı/güncellendi!\nmsg_pwd_removed=Şifre kaldırıldı. Girişler artık serbest.\nmsg_pwd_error=Mevcut şifre hatalı!\nmsg_error=Hata oluştu!\nmodal_error_empty=Bu alan boş bırakılamaz!\nmodal_error_min6=Şifre en az 6 karakter olmalıdır!\nmsg_service_installed=PXE Servisi başarıyla yüklendi! Sistem başladığında otomatik çalışacak.\nmsg_service_removed=PXE Servisi kaldırıldı.\nmsg_service_error=Bu işlem Yönetici (Administrator) yetkisi gerektirir! Programı yönetici olarak çalıştırın.\nnav_dhcp_config=DHCP / Firewall Konfigürasyonu\ndhcp_title=DHCP / iPXE Sunucu Yapılandırması\ndhcp_desc=Bu bölümü ortamınızda harici bir DHCP Sunucunuz varsa kullanın. \\n(Kurumsal ağ ortamları için geçerlidir) \\n\\nÖzelleştirilmiş bir iPXE DHCP politikasını (.bat) indirip Windows DHCP Sunucunuzda çalıştırabilirsiniz. Bu işlem DHCP Sunucunuza tek tıkla iPXE Server Politikası oluşturmanızı ayrıca EFI/BIOS cihazların da otomatik açılışını sağlar.\ndhcp_btn_download=Konfigürasyon Dosyasını İndir (.BAT)\ndhcp_server_ip=SUNUCU IP/DOMAIN ADRESI\ndhcp_preview_title=Politika Detayları\ndhcp_policy_name=Politika Adı\ndhcp_policy_value=Değer\ndhcp_step1=Sunucu IP/Domain Adresini Doğrulayın\ndhcp_step2=Script Dosyasını İndirin ve DHCP Sunucusunda Çalıştırın\ndhcp_ip_help=Bu IP/Domain, DHCP politikalarında 'Boot Server' (Option 66) olarak tanımlanacaktır.\ndhcp_preview_desc=Aşağıdaki ayarlar DHCP sunucunuza otomatik olarak eklenecektir:\ndhcp_warning=Dosyayı DHCP sunucunuzda Yönetici Olarak çalıştırmayı unutmayın.\nplaceholder_ip=Lütfen geçerli bir IP adresi girin\ndhcp_msg_template_error=DHCP şablonu oluşturulurken bir hata oluştu!\nnav_default_boot=Varsayılan Önyükleme\nboot_opt_hdd=Lokal Disk\nnav_countdown=Geri Sayım (sn)\ncountdown_hint=0 = Kapalı\ntip_set_default=Varsayılan yap\ntip_is_default=Varsayılan (aktif)\nfirewall_title=iPXE Sunucusu için Firewall İzin Dosyası\nfirewall_desc=iPXE sunucusunun sorunsuz çalışması için gerekli HTTP, TFTP ve DHCP portlarını Windows Güvenlik Duvarı'nda açar. Bu dosyayı iPXE sunucusunda yönetici olarak çalıştırın.\nfirewall_btn_download=Firewall İzin Dosyasını İndir (.BAT)\nmodal_extract_title=Ayıklama İşlemi\nmodal_extract_desc=Arka planda işleniyor. Tarayıcıyı kapatmayın.\nmsg_wim_extracting=Modifiye WinPE yüklendi. WIM dosyaları arka planda çıkarılıyor. Tamamlandığında menü otomatik güncellenecektir.\nbtn_upload_win=Windows ISO Ekle\nbtn_upload_linux=Linux ISO Ekle\nbtn_upload_wim=WinPE (.wim) Ekle\nbtn_upload_modified=Modifiye WinPE Ekle\ntip_upload_win=Windows kurulum ISO dosyası ekleyin. ISO, ağ kurulumu için WebDAV üzerinden sunulacaktır.\ntip_upload_linux=Linux dağıtım ISO dosyası ekleyin. Kernel ve initrd otomatik olarak çıkarılacaktır.\ntip_upload_standard=Standart WinPE (.wim) dosyası ekleyin. Yalnızca RAM üzerinde çalışan, dış kaynaklara ihtiyaç duymayan WinPE imajları için.\ntip_upload_modified=Modifiye WinPE ISO dosyası ekleyin (örn. Sergei Strelec). ISO, WebDAV üzerinden bağlanır ve içindeki programlara erişim sağlanır.\ntip_browse_iso=ISO İçeriğini Görüntüle\ntip_view_log=Çıkarma Logunu Görüntüle\ntip_upload_unattend=Katılımsız XML Yükle\ntip_drag=Sıralamak için sürükle\ntip_edit_alias=Açıklamayı düzenle\nmodal_log_title=Çıkarma Logu\nmodal_unattend_title=Katılımsız XML Yükle\nmodal_unattend_desc=Otomatik Windows kurulumu için katılımsız kurulum dosyası yükleyin.\nmodal_unattend_browse=XML Dosyası Seç\nmsg_unattend_saved=Katılımsız XML başarıyla kaydedildi!\nmsg_copying=Diske kopyalanıyor...\nsubtitle_iso_win=Orijinal Windows ISO (dokunulmamış) dosyalarını tercih edin.\nsubtitle_iso_linux=⚠ Secure Boot desteklenmez. Linux önyüklemesi için UEFI ayarlarından Secure Boot devre dışı bırakılmalıdır. \\n\\n⚠ Bazı Linux sürümleri desteklenmeyebilir. \\n\\n⚠ Ubuntu 24.04+ ve Ubuntu Server, katmanlı squashfs sistemi kullanır. Boot sırasında ISO'nun tamamı RAM'e yüklenmek zorundadır. Gereken minimum RAM, ISO boyutunun yaklaşık 2 katına eşittir. \\n\\n⚠ Düşük RAM ortamları için Debian 12, Linux Mint veya Ubuntu 22.04 LTS önerilir (tek squashfs dosyası, ~3–5 GB RAM yeterli).\ngroup_wim=WinPE (WIM)\ngroup_win=Windows Kurulum (ISO)\ngroup_linux=Linux Kurulum (ISO)\nbadge_wim_modified=Modifiye WinPE (ISO)\nmsg_network_error=Bağlantı Hatası!\n"};
+    const LOGO_DATA_URL = 'data:image/png;base64,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';
+    const defaults = {
+        loggedIn: false, password: 'admin', files: [],
+        settings: { domain: '192.168.1.100', language: 'Turkish', theme: 'dark', default_boot: 'HDD', countdown: 10 },
+        serverRunning: true
+    };
+    let s = JSON.parse(localStorage.getItem(KEY) || 'null') || JSON.parse(JSON.stringify(defaults));
+    const save = () => localStorage.setItem(KEY, JSON.stringify(s));
+    const fmtSize = b => b > 1e9 ? (b/1e9).toFixed(2)+' GB' : b > 1e6 ? (b/1e6).toFixed(1)+' MB' : (b/1e3).toFixed(0)+' KB';
+    const today = () => { const d=new Date(); return String(d.getDate()).padStart(2,'0')+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+d.getFullYear(); };
+    const jr = data => Promise.resolve(new Response(JSON.stringify(data), { status:200, headers:{'Content-Type':'application/json'} }));
+    const tr = text => Promise.resolve(new Response(text, { status:200, headers:{'Content-Type':'text/plain'} }));
+
+    function extractLog(folder, type, ms) {
+        const t = sec => new Date(Date.now()-(ms-sec*1000)).toTimeString().slice(0,8);
+        const L = [];
+        const BS = '\\';
+        if (type === 'ISO_LINUX') {
+            L.push(t(0)+' Started. ISO: pxe/ISO/Linux/'+folder+'/'+folder+'.iso', '', '=== Linux PXE Extractor ===', '',
+                   '  ISO : pxe/ISO/Linux/'+folder+'/'+folder+'.iso', '  Out : pxe/ISO/Linux/'+folder, '');
+            if (ms > 1000) L.push(t(1)+' [1/4] Mounting ISO...');
+            if (ms > 2000) L.push('         Using pre-mounted drive: G:'+BS, '         Drive: G:'+BS);
+            if (ms > 3000) L.push(t(3)+' [2/4] Detecting distro...');
+            if (ms > 3500) {
+                const dist = ['ubuntu','debian','fedora','arch'][folder.length % 4];
+                L.push('         Distro: '+dist, '         squashfs: casper/filesystem.squashfs (3142 MB)');
+            }
+            if (ms > 4500) L.push(t(4.5)+' [3/4] Searching kernel...');
+            if (ms > 5000) L.push('         Kernel: G:'+BS+'casper'+BS+'vmlinuz (15.8 MB)');
+            if (ms > 5500) L.push(t(5.5)+' [4/4] Searching initrd...');
+            if (ms > 6500) L.push('         initrd: G:'+BS+'casper'+BS+'initrd (78.2 MB)');
+            if (ms > 7000) L.push('         Done! Extracted to pxe/ISO/Linux/'+folder);
+            if (ms > 8000) L.push('Extraction complete. ISO remains mounted for PXE serving.');
+        } else if (type === 'ISO_WIN') {
+            L.push(t(0)+' Started. Windows ISO extraction & WebClient Integration (Fast wimlib method).',
+                   t(0)+' ISO: pxe/ISO/Windows/'+folder+'/source.iso');
+            if (ms > 1500) L.push(t(1.5)+'   Mounted at: H:'+BS);
+            if (ms > 2500) L.push(t(2.5)+'   Copying boot.wim (485 MB)...');
+            if (ms > 4000) L.push(t(4)+'   boot.wim OK');
+            if (ms > 4500) L.push(t(4.5)+'   Injecting Rclone and WinFsp into boot.wim System32...');
+            if (ms > 5000) L.push(t(5)+'   WIM arch: x64');
+            if (ms > 5500) L.push(t(5.5)+'   Injecting UCRT/API Set DLLs (x64)...');
+            if (ms > 7000) L.push(t(7)+'   Rclone injected successfully.');
+            if (ms > 7500) L.push(t(7.5)+' Done.');
+            if (ms > 8000) L.push(t(8)+' === All done. ===');
+            if (ms > 8500) L.push(t(8.5)+'   ISO remains mounted at H:'+BS+' for WebDAV serving.');
+        } else if (type === 'WIM_MODIFIED') {
+            L.push(t(0)+' Started. ISO: pxe/WINPE/'+folder+'/source.iso', t(0)+' Target : pxe/WINPE/'+folder);
+            if (ms > 1000) L.push(t(1)+' [1/4] Mounting ISO...');
+            if (ms > 1500) L.push(t(1.5)+'   Mounted at: I:'+BS);
+            if (ms > 2000) L.push(t(2)+' [2/4] Looking for BCD...');
+            if (ms > 2500) L.push('         BCD entry: strelec10x64Eng -> SSTR'+BS+'strelec10x64Eng.wim',
+                                   '         BCD entry: strelec11x64Eng -> SSTR'+BS+'strelec11x64Eng.wim');
+            if (ms > 2800) L.push('         BCD parse OK: 2 WIM(s).');
+            if (ms > 3500) L.push(t(3.5)+' [3/4] BCD provided entries, skipping WIM scan.');
+            if (ms > 4000) L.push(t(4)+' [4/4] Copying WIMs and boot support files...');
+            if (ms > 4500) L.push('         Copying: SSTR'+BS+'strelec10x64Eng.wim (842 MB) -> strelec10x64Eng'+BS+'boot.wim');
+            if (ms > 5500) L.push('         Copying: SSTR'+BS+'strelec11x64Eng.wim (956 MB) -> strelec11x64Eng'+BS+'boot.wim');
+            if (ms > 6000) L.push(t(6)+' Done. 2 WIM(s) extracted.');
+            if (ms > 6500) L.push(t(6.5)+'   Injecting Rclone/davinst into strelec10x64Eng/boot.wim...',
+                                   t(6.7)+'   WIM arch: x64',
+                                   t(6.9)+'   Injecting UCRT/API Set DLLs (x64)...');
+            if (ms > 7300) L.push(t(7.3)+'   Rclone injected into strelec10x64Eng/boot.wim (image 1) successfully.');
+            if (ms > 7400) L.push(t(7.4)+'   Injecting Rclone/davinst into strelec11x64Eng/boot.wim...',
+                                   t(7.6)+'   WIM arch: x64',
+                                   t(7.8)+'   Injecting UCRT/API Set DLLs (x64)...');
+            if (ms > 8000) L.push(t(8)+'   Rclone injected into strelec11x64Eng/boot.wim (image 1) successfully.');
+            if (ms > 8500) L.push(t(8.5)+' === All done. ===');
+        } else {
+            L.push(t(0)+' Started. Standard WinPE WIM upload.');
+            if (ms > 2000) L.push(t(2)+'   File saved to pxe/WINPE/'+folder+'/boot.wim');
+            if (ms > 3000) L.push(t(3)+'   Injecting Rclone/davinst...');
+            if (ms > 4000) L.push(t(4)+'   WIM arch: x64');
+            if (ms > 4500) L.push(t(4.5)+'   Injecting UCRT/API Set DLLs (x64)...');
+            if (ms > 6000) L.push(t(6)+' === All done. ===');
+        }
+        return L;
+    }
+
+    // Intercept fetch()
+    const origFetch = window.fetch.bind(window);
+    window.fetch = function(url, opts) {
+        const u = typeof url === 'string' ? url : url.url;
+        let body = {};
+        try { if (opts && opts.body && typeof opts.body === 'string') body = JSON.parse(opts.body); } catch(e) {}
+
+        // === Embedded Lang files ===
+        if (u.indexOf('/Lang/') >= 0 && u.endsWith('.ini')) {
+            const m = u.match(/\/Lang\/([^\/]+)\.ini/);
+            if (m && LANGS[m[1]]) return tr(LANGS[m[1]]);
+            return Promise.resolve(new Response('', { status: 404 }));
+        }
+
+        // === API mocks ===
+        if (u.endsWith('/api/auth/status'))        return jr({ has_password: true, logged_in: s.loggedIn });
+        if (u.endsWith('/api/auth/login'))         { const ok = body.password === s.password; if (ok) { s.loggedIn = true; save(); } return jr({ success: ok, error: ok ? '' : 'Invalid username or password!' }); }
+        if (u.endsWith('/api/auth/logout'))        { s.loggedIn = false; save(); return jr({ success: true }); }
+        if (u.endsWith('/api/auth/set_password')) {
+            if (body.current_password !== s.password) return jr({ success: false, error: 'Current password is incorrect!' });
+            s.password = body.new_password || 'admin'; save();
+            return jr({ success: true });
+        }
+        if (u.endsWith('/api/settings/get'))       return jr(s.settings);
+        if (u.endsWith('/api/settings/set'))       { Object.assign(s.settings, body); save(); return jr({ success: true }); }
+        if (u.endsWith('/api/boot_settings'))      { Object.assign(s.settings, body); save(); return jr({ success: true }); }
+        if (u.endsWith('/api/files'))              return jr(s.files);
+        if (u.endsWith('/api/delete'))             { s.files = s.files.filter(f => f.name !== body.name); save(); return jr({ success: true }); }
+        if (u.endsWith('/api/edit_alias'))         { const f = s.files.find(x => x.name === body.name); if (f) { f.alias = body.alias; save(); } return jr({ success: true }); }
+        if (u.endsWith('/api/reorder'))            {
+            const map = {}; (body.order || []).forEach((n,i) => map[n] = i);
+            s.files.sort((a,b) => (map[a.name] != null ? map[a.name] : 999) - (map[b.name] != null ? map[b.name] : 999)); save();
+            return jr({ success: true });
+        }
+        if (u.indexOf('/api/wim_extract_status/') >= 0) {
+            const folder = decodeURIComponent(u.split('/api/wim_extract_status/')[1]);
+            const f = s.files.find(x => x.name === folder);
+            if (!f) return jr({ done: true, lines: [] });
+            if (!f._extractStart) { f._extractStart = Date.now(); save(); }
+            const ms = Date.now() - f._extractStart;
+            return jr({ done: ms > 9500, lines: extractLog(folder, f.type, ms) });
+        }
+        if (u.indexOf('/api/view_log/') >= 0) {
+            const folder = decodeURIComponent(u.split('/api/view_log/')[1]);
+            const f = s.files.find(x => x.name === folder);
+            const ms = Math.max(f && f._extractStart ? Date.now() - f._extractStart : 12000, 12000);
+            return jr({ success: true, log: extractLog(folder, (f && f.type) || 'WIM', ms).join('\n') });
+        }
+        if (u.endsWith('/api/service/status'))     return jr({ installed: false });
+        if (u.endsWith('/api/service/install'))    return jr({ success: true });
+        if (u.endsWith('/api/service/remove'))     return jr({ success: true });
+        if (u.endsWith('/api/server/status'))      return jr({ status: s.serverRunning ? 'Online' : 'Offline', online: s.serverRunning, active_connections: 0, connections: [] });
+        if (u.endsWith('/api/server/start'))       { s.serverRunning = true; save(); return jr({ success: true }); }
+        if (u.endsWith('/api/server/stop'))        { s.serverRunning = false; save(); return jr({ success: true }); }
+        if (u.endsWith('/api/stats')) {
+            const win = s.files.filter(f => f.type === 'ISO_WIN').length;
+            const lin = s.files.filter(f => f.type === 'ISO_LINUX').length;
+            const wim = s.files.filter(f => f.type === 'WIM' || f.type === 'WIM_MODIFIED').length;
+            // Sahte istemci havuzu — gerçek bir lab ortamı gibi görünür
+            const POOL = ['192.168.1.45', '192.168.1.102', '192.168.1.78', '10.0.0.87', '10.0.0.124', '172.16.5.33'];
+            // Zaman bazlı rotasyon — her ~5 saniyede liste değişir, lab boot ediyormuş gibi
+            const tick = Math.floor(Date.now() / 5000);
+            // 1-3 client arası göster (rastgele ama deterministik)
+            const count = 1 + (tick % 3);
+            const clients = [];
+            for (let i = 0; i < count; i++) clients.push(POOL[(tick + i) % POOL.length]);
+            return jr({
+                iso_win: win, iso_linux: lin, wim,
+                active_connections: clients.length,
+                clients: clients,
+                file_order: s.files.map(f => f.name),
+                countdown: s.settings.countdown,
+                default_boot: s.settings.default_boot
+            });
+        }
+        if (u.endsWith('/api/languages'))          return jr(Object.keys(LANGS).sort());
+        if (u.endsWith('/api/app/shutdown'))       return jr({ success: true });
+        if (u.endsWith('/api/upload_unattend'))    return jr({ success: true });
+
+        // Pass through other static assets
+        if (/\.(png|jpg|jpeg|svg|css|js|ico|woff|woff2|ttf)(\?|$)/.test(u)) return origFetch(url, opts);
+
+        console.warn('[DEMO] Unmocked endpoint:', u);
+        return jr({ success: true });
+    };
+
+    // Intercept XMLHttpRequest (for /api/upload)
+    const OrigXHR = window.XMLHttpRequest;
+    window.XMLHttpRequest = function() {
+        const xhr = new OrigXHR();
+        const origOpen = xhr.open.bind(xhr);
+        const origSend = xhr.send.bind(xhr);
+        let mocked = false, formData = null;
+        xhr.open = function(method, url) {
+            if (url.endsWith('/api/upload')) { mocked = true; return; }
+            return origOpen.apply(xhr, arguments);
+        };
+        xhr.send = function(data) {
+            if (!mocked) return origSend(data);
+            formData = data;
+            const file = formData.get('file');
+            const fileSize = (file && file.size) || 1e9;
+            let uploaded = 0;
+            const chunk = Math.max(fileSize / 25, 5e5);
+            const timer = setInterval(() => {
+                uploaded = Math.min(uploaded + chunk, fileSize);
+                if (xhr.upload.onprogress) xhr.upload.onprogress({ lengthComputable: true, loaded: uploaded, total: fileSize });
+                if (uploaded >= fileSize) {
+                    clearInterval(timer);
+                    const category = formData.get('category') || 'WIM';
+                    const customName = formData.get('custom_name') || '';
+                    const alias = formData.get('alias') || customName || file.name;
+                    const name = customName || file.name.replace(/\.[^.]+$/, '');
+                    const isExtract = ['ISO_LINUX','ISO_WIN','WIM_MODIFIED'].indexOf(category) >= 0;
+                    s.files.push({
+                        name: name, alias: alias, type: category,
+                        size: fmtSize(file.size), date: today(),
+                        is_dir: isExtract, iso_file: file.name
+                    });
+                    save();
+                    setTimeout(() => {
+                        Object.defineProperty(xhr, 'status', { value: 200 });
+                        Object.defineProperty(xhr, 'responseText', { value: JSON.stringify({ success: true, extracting: isExtract, folder: name }) });
+                        Object.defineProperty(xhr, 'readyState', { value: 4 });
+                        if (xhr.onload) xhr.onload();
+                    }, 250);
+                }
+            }, 70);
+        };
+        return xhr;
+    };
+
+    // Logo fix: replace broken /pxe/TOOLS/ipxe.png with embedded base64 logo
+    function fixLogos() {
+        if (!LOGO_DATA_URL) return;
+        document.querySelectorAll('img').forEach(img => {
+            const src = img.getAttribute('src') || '';
+            if (src.indexOf('ipxe.png') >= 0 || src.indexOf('/pxe/') >= 0) {
+                img.src = LOGO_DATA_URL;
+            }
+        });
+    }
+
+    // Demo banner
+    document.addEventListener('DOMContentLoaded', () => {
+        fixLogos();
+        // Re-apply when DOM mutates (login modal, etc.)
+        new MutationObserver(fixLogos).observe(document.body, { childList: true, subtree: true });
+
+        const banner = document.createElement('div');
+        banner.id = 'demoBanner';
+        banner.style.cssText = 'position:fixed;top:0;left:0;right:0;background:linear-gradient(90deg,#fbbf24,#f59e0b);color:#1f2937;text-align:center;padding:6px 14px;font-family:-apple-system,Segoe UI,Roboto,sans-serif;font-size:13px;font-weight:500;z-index:99999;box-shadow:0 2px 8px rgba(0,0,0,0.25);';
+        banner.innerHTML = '\u{1F3AD} <strong>DEMO MODE</strong> &mdash; \u{1F1F9}\u{1F1F7} Bu bir simülasyondur, gerçek dosya yüklemesi yapılmaz / \u{1F1EC}\u{1F1E7} This is a simulation, no actual file upload occurs. <i class="fa-solid fa-key" style="color:#1f2937;margin-right:4px;"></i><code style="background:#1f2937;color:#fde68a;padding:2px 10px;border-radius:4px;font-family:Consolas,Monaco,monospace;font-weight:700;letter-spacing:0.5px;">admin</code> &middot; <a href="https://github.com/abdullah-erturk/iPXE-Manager" target="_blank" style="color:#1f2937;text-decoration:underline;">GitHub</a> &middot; <a href="#" id="demoResetBtn" style="color:#1f2937;text-decoration:underline;">Reset</a>';
+        document.body.appendChild(banner);
+        document.body.style.paddingTop = '34px';
+        document.getElementById('demoResetBtn').onclick = function(e) {
+            e.preventDefault();
+            if (confirm('Demo verisini sıfırla?')) {
+                localStorage.removeItem(KEY);
+                location.reload();
+            }
+        };
+    });
+
+    console.log('%c\u{1F3AD} iPXE Manager — DEMO MODE', 'font-size:16px;font-weight:bold;color:#f59e0b;');
+    console.log('%cDefault password: admin', 'color:#6b7280;');
+    console.log('%cReset: localStorage.removeItem("'+KEY+'")', 'color:#6b7280;');
+})();
+</script>
+<script>
+        let translations = {}; let selectedLang = 'Turkish';
+        let currentCategory = 'ALL'; let currentFiles = []; let uploadFileHandle = null; let lastClients = [];
+        let currentView = 'category'; // 'category' veya 'dhcp'
+        let authData = { has_password: false, logged_in: false };
+
+        /* ── Hamburger ── */
+        function toggleSidebar() {
+            const sb = document.getElementById('sidebar');
+            const ov = document.getElementById('sidebarOverlay');
+            const ic = document.getElementById('hamburgerIcon');
+            sb.classList.toggle('open');
+            ov.classList.toggle('active');
+            ic.className = sb.classList.contains('open') ? 'fa-solid fa-xmark' : 'fa-solid fa-bars';
+        }
+        function closeSidebar() {
+            document.getElementById('sidebar').classList.remove('open');
+            document.getElementById('sidebarOverlay').classList.remove('active');
+            document.getElementById('hamburgerIcon').className = 'fa-solid fa-bars';
+        }
+
+        /* ── Toast ── */
+        function showToast(m, pending, pct) {
+            const t = document.getElementById('toast');
+            document.getElementById('toastMsg').innerText = m;
+            t.style.transform = 'translateY(0)';
+
+            const spinner = document.getElementById('toastSpinner');
+            const check   = document.getElementById('toastCheck');
+            const wrap    = document.getElementById('toastProgressWrap');
+            const bar     = document.getElementById('toastProgressBar');
+            const pctEl   = document.getElementById('toastPct');
+
+            spinner.style.display = pending ? 'block' : 'none';
+            check.style.display   = pending ? 'none'  : 'block';
+
+            if (pending && pct !== undefined) {
+                const p = Math.round(Number(pct));
+                wrap.style.display = 'block';
+                bar.style.width = p + '%';
+                pctEl.innerText = p + '%';
+            } else if (!pending) {
+                wrap.style.display = 'none';
+                bar.style.width = '0%';
+                pctEl.innerText = '';
+                setTimeout(() => t.style.transform = 'translateY(150px)', 3000);
+            } else {
+                wrap.style.display = 'none';
+                bar.style.width = '0%';
+                pctEl.innerText = '';
+            }
+        }
+
+        /* ── Global Operation Lock ── */
+        let _busyOp = false;
+        function _setBusy(val) {
+            _busyOp = val;
+            document.body.classList.toggle('app-busy', val);
+        }
+
+        /* ── Upload with progress bar ── */
+        function startUpload() {
+            if (_busyOp) { showToast(translations['msg_processing'] || 'Please wait...', true); return; }
+            _setBusy(true);
+            const f = new FormData();
+            f.append('file', uploadFileHandle);
+            f.append('alias', document.getElementById('modalAlias').value);
+            f.append('custom_name', document.getElementById('modalFilename').value);
+            f.append('category', window._uploadCategory || currentCategory);
+            closeModal('uploadModal');
+
+            showToast(translations['msg_loading'] || 'Uploading...', true, 0);
+
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', '/api/upload', true);
+            xhr.upload.onprogress = function(e) {
+                if (e.lengthComputable) {
+                    const pct = Math.round((e.loaded / e.total) * 100);
+                    if (pct < 100) {
+                        showToast(translations['msg_loading'] || 'Uploading...', true, pct);
+                    } else {
+                        // Phase 2: sıfırla, sahte kopyalama ilerlemesi
+                        if (window._fakeCopyTimer) { clearInterval(window._fakeCopyTimer); window._fakeCopyTimer = null; }
+                        showToast(translations['msg_copying'] || 'Copying to disk...', true, 0);
+                        let fakeP = 0;
+                        window._fakeCopyTimer = setInterval(() => {
+                            fakeP = Math.min(fakeP + 5, 90);
+                            showToast(translations['msg_copying'] || 'Copying to disk...', true, fakeP);
+                        }, 400);
+                    }
+                }
+            };
+            xhr.onload = function() {
+                if (window._fakeCopyTimer) { clearInterval(window._fakeCopyTimer); window._fakeCopyTimer = null; }
+                // Progress bar'ı her durumda sıfırla
+                document.getElementById('toastProgressWrap').style.display = 'none';
+                document.getElementById('toastProgressBar').style.width = '0%';
+                document.getElementById('toastPct').innerText = '';
+
+                if (xhr.status === 200) {
+                    try {
+                        const d = JSON.parse(xhr.responseText);
+                        if (d.success) {
+                            document.getElementById('fileUpload').value = '';
+                            uploadFileHandle = null;
+                            fetchFiles();
+                            if (d.extracting) {
+                                // Toast'ı tamamen gizle, sadece extract modal göster
+                                document.getElementById('toast').style.transform = 'translateY(150px)';
+                                showExtractModal(d.folder || '');
+                            } else {
+                                showToast(translations['msg_upload_success'] || 'Done!');
+                                _setBusy(false);
+                            }
+                        } else {
+                            showToast(translations['msg_upload_error'] || 'Error!', false);
+                            _setBusy(false);
+                        }
+                    } catch(e) {
+                        showToast(translations['msg_upload_error'] || 'Error!', false);
+                        _setBusy(false);
+                    }
+                } else {
+                    showToast(translations['msg_upload_error'] || 'Error!', false);
+                    _setBusy(false);
+                }
+            };
+            xhr.onerror = function() {
+                if (window._fakeCopyTimer) { clearInterval(window._fakeCopyTimer); window._fakeCopyTimer = null; }
+                showToast(translations['msg_upload_error'] || 'Error!', false);
+                _setBusy(false);
+            };
+            xhr.send(f);
+        }
+
+        /* ── WIM Extraction Progress ── */
+        let _extractPollTimer = null;
+        function showExtractModal(folder) {
+            const modal = document.getElementById('extractModal');
+            document.getElementById('extractLogBox').textContent = '';
+            document.getElementById('extractSpinner').style.display = 'block';
+            document.getElementById('extractCloseBtn').style.display = 'none';
+            // Tüm data-i18n elementlerini aktif dile göre çevir
+            modal.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[key]) el.innerText = translations[key];
+            });
+            modal.style.display = 'flex';
+            if (_extractPollTimer) clearInterval(_extractPollTimer);
+            _extractPollTimer = setInterval(() => pollExtractStatus(folder), 2500);
+            pollExtractStatus(folder);
+        }
+        async function pollExtractStatus(folder) {
+            try {
+                const r = await fetch('/api/wim_extract_status/' + encodeURIComponent(folder));
+                const d = await r.json();
+                const box = document.getElementById('extractLogBox');
+                if (d.lines && d.lines.length > 0) {
+                    box.textContent = d.lines.join('\n');
+                    box.scrollTop = box.scrollHeight;
+                } else if (!d.done) {
+                    box.textContent = (translations['msg_processing'] || 'Processing...') + '\n';
+                }
+                if (d.done) {
+                    clearInterval(_extractPollTimer);
+                    _extractPollTimer = null;
+                    if (window._fakeCopyTimer) { clearInterval(window._fakeCopyTimer); window._fakeCopyTimer = null; }
+                    document.getElementById('toastProgressWrap').style.display = 'none';
+                    document.getElementById('toastProgressBar').style.width = '0%';
+                    document.getElementById('toastPct').innerText = '';
+                    document.getElementById('toast').style.transform = 'translateY(150px)';
+                    document.getElementById('extractSpinner').style.display = 'none';
+                    document.getElementById('extractStatus').innerText = translations['msg_done'] || 'Done!';
+                    document.getElementById('extractCloseBtn').style.display = 'inline-flex';
+                    fetchFiles();
+                }
+            } catch(e) {}
+        }
+        function closeExtractModal() {
+            document.getElementById('extractModal').style.display = 'none';
+            if (_extractPollTimer) { clearInterval(_extractPollTimer); _extractPollTimer = null; }
+            if (window._fakeCopyTimer) { clearInterval(window._fakeCopyTimer); window._fakeCopyTimer = null; }
+            // Toast'u doğrudan kapat
+            const toast = document.getElementById('toast');
+            document.getElementById('toastProgressWrap').style.display = 'none';
+            document.getElementById('toastProgressBar').style.width = '0%';
+            document.getElementById('toastPct').innerText = '';
+            toast.style.transform = 'translateY(150px)';
+            _setBusy(false);
+        }
+
+        /* ── Log Viewer ── */
+        async function viewLog(folder) {
+            document.getElementById('logContent').textContent = (translations['msg_loading'] || 'Loading...');
+            document.getElementById('logModal').style.display = 'flex';
+            try {
+                const r = await fetch('/api/view_log/' + encodeURIComponent(folder));
+                const d = await r.json();
+                document.getElementById('logContent').textContent = d.success ? d.log : ('Error: ' + d.error);
+            } catch(e) {
+                document.getElementById('logContent').textContent = 'Error: ' + e;
+            }
+        }
+
+        /* ── Unattend Upload ── */
+        let _unattendFolder = '';
+        function uploadUnattend(folder) {
+            _unattendFolder = folder;
+            document.getElementById('unattendFile').value = '';
+            document.getElementById('unattendModal').style.display = 'flex';
+        }
+        async function submitUnattend() {
+            const file = document.getElementById('unattendFile').files[0];
+            if (!file) return;
+            if (_busyOp) { showToast(translations['msg_processing'] || 'Please wait...', true); return; }
+            closeModal('unattendModal');
+            const fd = new FormData();
+            fd.append('name', _unattendFolder);
+            fd.append('file', file);
+            try {
+                const r = await fetch('/api/upload_unattend', { method: 'POST', body: fd });
+                const d = await r.json();
+                showToast(d.success ? (translations['msg_unattend_saved'] || 'Unattend XML saved!') : (translations['msg_upload_error'] || 'Error!'), d.success);
+            } catch(e) {
+                showToast(translations['msg_upload_error'] || 'Error!', false);
+            }
+        }
+
+        /* ── Init ── */
+        async function populateLangDropdown() {
+            try {
+                const langs = await (await fetch('/api/languages')).json();
+                const sel = document.getElementById('langSelect');
+                sel.innerHTML = langs.map(l => `<option value="${l}">${l}</option>`).join('');
+                sel.value = selectedLang;
+            } catch(e) {
+                const sel = document.getElementById('langSelect');
+                if (!sel.options.length) sel.innerHTML = '<option value="Turkish">Turkish</option><option value="English">English</option>';
+            }
+        }
+
+        async function init() {
+            selectedLang = localStorage.getItem('pxe_lang') || 'Turkish';
+            await populateLangDropdown();
+            await loadLanguage(selectedLang);
+            try {
+                const authRes = await fetch('/api/auth/status');
+                authData = await authRes.json();
+                if (authData.has_password && !authData.logged_in) {
+                    document.getElementById('loginOverlay').style.display = 'flex';
+                    return;
+                }
+            } catch(e) {
+                console.warn("API/Local mode: Auth durumu alınamadı.");
+            }
+            document.getElementById('loginOverlay').style.display = 'none';
+            await finishInit();
+        }
+
+        async function finishInit() {
+            updateAuthUI();
+            try {
+                const srvRes = await fetch('/api/service/status');
+                const srvData = await srvRes.json();
+                if (srvData.installed) {
+                    document.getElementById('srvInstallText').setAttribute('data-i18n', 'nav_service_remove');
+                    document.getElementById('srvInstallBtn').setAttribute('data-installed', 'true');
+                } else {
+                    document.getElementById('srvInstallText').setAttribute('data-i18n', 'nav_service_install');
+                    document.getElementById('srvInstallBtn').setAttribute('data-installed', 'false');
+                }
+            } catch(e) { console.warn("API/Local mode: Servis durumu alınamadı."); }
+            
+            try {
+                const r = await fetch('/api/settings/get');
+                if (!r.ok) throw new Error("Unauthorized");
+                const d = await r.json();
+                if (d.domain) document.getElementById('serverIP').value = d.domain;
+                if (d.theme === 'dark' && !document.body.classList.contains('dark')) toggleTheme();
+                else if (d.theme === 'light' && document.body.classList.contains('dark')) toggleTheme();
+                selectedLang = localStorage.getItem('pxe_lang') || d.language || selectedLang;
+                document.getElementById('langSelect').value = selectedLang;
+                
+                if (d.countdown !== undefined) document.getElementById('countdownInput').value = d.countdown;
+                window._currentDefault = d.default_boot || 'HDD';
+                window._currentFileOrder = d.file_order || [];
+            } catch(e) { console.warn("API/Local mode: Ayarlar alınamadı."); }
+            
+            await loadLanguage(selectedLang);
+            updateStats();
+            if (!window.statsInterval) window.statsInterval = setInterval(updateStats, 3000);
+            fetchFiles();
+        }
+
+        function updateAuthUI() {
+            const pwdModalTitle = document.querySelector('#pwdModal h2');
+            const pwdModalBtn   = document.getElementById('pwdSubmitBtn');
+            if (authData.has_password) {
+                document.getElementById('pwdBtnText').setAttribute('data-i18n', 'nav_password_ops');
+                document.getElementById('pwdCurrent').style.display = 'block';
+                document.getElementById('pwdRemoveBtn').style.display = 'block';
+                document.getElementById('logoutBtn').style.display = 'flex';
+                if (pwdModalTitle) pwdModalTitle.setAttribute('data-i18n', 'nav_password_ops');
+                if (pwdModalBtn)   pwdModalBtn.setAttribute('data-i18n', 'nav_password_ops');
+            } else {
+                document.getElementById('pwdBtnText').setAttribute('data-i18n', 'nav_password_set');
+                document.getElementById('pwdCurrent').style.display = 'none';
+                document.getElementById('pwdRemoveBtn').style.display = 'none';
+                document.getElementById('logoutBtn').style.display = 'none';
+                if (pwdModalTitle) pwdModalTitle.setAttribute('data-i18n', 'nav_password_set');
+                if (pwdModalBtn)   pwdModalBtn.setAttribute('data-i18n', 'nav_password_set');
+            }
+        }
+
+        async function doLogin() {
+            const u = document.getElementById('loginUsername').value;
+            const p = document.getElementById('loginPassword').value;
+            const err = document.getElementById('loginError');
+            err.style.display = 'none';
+            try {
+                const r = await fetch('/api/auth/login', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({username:u, password:p}) });
+                const res = await r.json();
+                if (res.success) { document.getElementById('loginPassword').value = ''; init(); }
+                else { err.style.display = 'block'; err.innerText = translations['login_error'] || "Invalid password!"; }
+            } catch(e) {
+                err.style.display = 'block'; err.innerText = translations['msg_network_error'] || 'Network Error!';
+            }
+        }
+
+        async function doLogout() {
+            try {
+                await fetch('/api/auth/logout', { method:'POST' });
+            } catch(e) { console.warn(e); }
+            location.reload();
+        }
+
+        function showPwdModal() {
+            updateAuthUI();
+            document.getElementById('pwdError').style.display = 'none';
+            document.getElementById('pwdCurrent').value = '';
+            document.getElementById('pwdNew').value = '';
+            document.getElementById('pwdModal').style.display = 'flex';
+            loadLanguage(selectedLang);
+        }
+
+        async function setOrUpdatePassword() {
+            const cur  = document.getElementById('pwdCurrent').value;
+            const newp = document.getElementById('pwdNew').value;
+            const err  = document.getElementById('pwdError');
+            if (!newp) { err.style.display='block'; err.innerText = translations['modal_error_empty'] || "Cannot be empty!"; return; }
+            if (newp.length < 6) { err.style.display='block'; err.innerText = translations['modal_error_min6'] || "Min. 6 karakter!"; return; }
+            try {
+                const r = await fetch('/api/auth/set_password', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({current_password:cur, new_password:newp}) });
+                const res = await r.json();
+                if (res.success) { closeModal('pwdModal'); showToast(translations['msg_pwd_updated'] || "Güncellendi!"); init(); }
+                else { err.style.display = 'block'; err.innerText = translations[res.error] || translations['msg_pwd_error'] || 'Wrong password!'; }
+            } catch(e) {
+                err.style.display = 'block'; err.innerText = translations['msg_network_error'] || 'Network Error!';
+            }
+        }
+
+        async function removePassword() {
+            const cur = document.getElementById('pwdCurrent').value;
+            const err = document.getElementById('pwdError');
+            try {
+                const r = await fetch('/api/auth/set_password', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({current_password:cur, new_password:""}) });
+                const res = await r.json();
+                if (res.success) { closeModal('pwdModal'); showToast(translations['msg_pwd_removed'] || "Şifre kaldırıldı!"); init(); }
+                else { err.style.display = 'block'; err.innerText = translations[res.error] || translations['msg_pwd_error'] || 'Wrong password!'; }
+            } catch(e) {
+                err.style.display = 'block'; err.innerText = translations['msg_network_error'] || 'Network Error!';
+            }
+        }
+
+        async function installService() {
+            showToast(translations['msg_processing'] || "Processing...", true);
+            const isInstalled = document.getElementById('srvInstallBtn').getAttribute('data-installed') === 'true';
+            const endpoint = isInstalled ? '/api/service/remove' : '/api/service/install';
+            try {
+                const r = await fetch(endpoint, { method:'POST' });
+                const res = await r.json();
+                if (res.success) { showToast(isInstalled ? (translations['msg_service_removed'] || "Kaldırıldı!") : (translations['msg_service_installed'] || "Yüklendi!")); init(); }
+                else { alert(translations[res.error] || res.error); showToast(translations['msg_error'] || "Hata!"); }
+            } catch(e) {
+                showToast(translations['msg_network_error'] || 'Network Error!', false);
+            }
+        }
+
+        async function loadLanguage(lang) {
+            try {
+                const res = await fetch(`/Lang/${lang}.ini`);
+                const text = await res.text(); translations = {};
+                text.split('\n').forEach(line => { const [k, ...v] = line.trim().split('='); if(k && v.length) translations[k.trim()] = v.join('=').trim(); });
+                document.querySelectorAll('[data-i18n]').forEach(el => { const k = el.getAttribute('data-i18n'); if(translations[k]) el.innerHTML = translations[k].replace(/\\n/g, '<br>'); });
+                document.querySelectorAll('[data-i18n-title]').forEach(el => { const k = el.getAttribute('data-i18n-title'); if(translations[k]) el.title = translations[k].replace(/\\n/g, '\n'); });
+                document.querySelectorAll('[data-i18n-placeholder]').forEach(el => { const k = el.getAttribute('data-i18n-placeholder'); if(translations[k]) el.placeholder = translations[k].replace(/\\n/g, '\n'); });
+                if (currentView === 'dhcp') {
+                    showDhcp();
+                } else {
+                    loadCategory(currentCategory);
+                }
+            } catch(e) { 
+                console.warn("API/Local mode: Dil yüklenemedi", e.message); 
+                translations = {}; 
+            }
+        }
+
+        function selectLanguage(l) { selectedLang = l; localStorage.setItem('pxe_lang', l); loadLanguage(l); }
+
+        async function updateStats() {
+            try {
+                const r = await fetch('/api/stats'); const d = await r.json();
+                document.getElementById('activeConnections').innerText = d.active_connections; lastClients = d.clients;
+                
+                const currentOrderStr = JSON.stringify(window._currentFileOrder || []);
+                const newOrderStr = JSON.stringify(d.file_order || []);
+                
+                let needsRefresh = false;
+                if (currentOrderStr !== newOrderStr) {
+                    window._currentFileOrder = d.file_order;
+                    needsRefresh = true;
+                }
+                if (window._currentDefault !== d.default_boot) {
+                    window._currentDefault = d.default_boot;
+                    needsRefresh = true;
+                }
+                if (d.countdown !== undefined && d.countdown !== null && document.getElementById('countdownInput') && parseInt(document.getElementById('countdownInput').value) !== d.countdown && document.activeElement !== document.getElementById('countdownInput')) {
+                    document.getElementById('countdownInput').value = d.countdown;
+                }
+
+                if (needsRefresh) {
+                    fetchFiles();
+                }
+
+                const sr = await fetch('/api/server/status'); const sd = await sr.json();
+                const btn = document.getElementById('serviceBtn'); const txt = document.getElementById('serviceText'); const stx = document.getElementById('serverStatusText');
+                if (sd.status === 'Online') {
+                    stx.innerText = translations['status_online'] || "Online";
+                    btn.className = "service-btn running";
+                    txt.innerText = translations['btn_stop_service'] || "Durdur";
+                    btn.querySelector('i').className = "fa-solid fa-stop";
+                } else {
+                    stx.innerText = translations['status_offline'] || "Offline";
+                    btn.className = "service-btn stopped";
+                    txt.innerText = translations['btn_start_service'] || "Başlat";
+                    btn.querySelector('i').className = "fa-solid fa-play";
+                }
+            } catch(e) {}
+        }
+
+        function loadCategory(cat) {
+            currentCategory = cat;
+            currentView = 'category';
+            document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+            const idx = { 'ALL': 1, 'ISO_WIN': 2, 'ISO_LINUX': 3, 'WIM': 4 }[cat];
+            const link = document.querySelector(`.nav-links li:nth-child(${idx}) a`);
+            if (link) link.classList.add('active');
+
+            document.querySelector('.stats-grid').style.display = 'grid';
+            document.getElementById('section-dhcp').style.display = 'none';
+            
+            if (document.getElementById('bootSettingsCard')) {
+                document.getElementById('bootSettingsCard').style.display = (cat === 'ALL' ? 'block' : 'none');
+            }
+
+            const mainCard = document.getElementById('mainTableCard');
+            if (mainCard) mainCard.style.display = 'block';
+
+            document.getElementById('uploadBtnContainer').style.display = (cat === 'ALL' ? 'none' : 'flex');
+            const modBtn = document.getElementById('modifiedWinpeBtn');
+            if (modBtn) modBtn.style.display = (cat === 'WIM' ? 'inline-flex' : 'none');
+
+            // Kategoriye özel yükle butonu metni ve hover mesajı
+            const stdBtn = document.getElementById('standardUploadBtn');
+            if (stdBtn) {
+                const labelMap = {
+                    'ISO_WIN':   'btn_upload_win',
+                    'ISO_LINUX': 'btn_upload_linux',
+                    'WIM':       'btn_upload_wim'
+                };
+                const titleMap = {
+                    'ISO_WIN':   'tip_upload_win',
+                    'ISO_LINUX': 'tip_upload_linux',
+                    'WIM':       'tip_upload_standard'
+                };
+                const key      = labelMap[cat] || 'btn_upload';
+                const titleKey = titleMap[cat] || 'tip_upload_standard';
+                stdBtn.querySelector('span').setAttribute('data-i18n', key);
+                stdBtn.querySelector('span').innerText = translations[key] || translations['btn_upload'] || 'Add New';
+                stdBtn.setAttribute('data-i18n-title', titleKey);
+                stdBtn.title = translations[titleKey] || '';
+            }
+
+            document.getElementById('contentTitle').innerText = translations['nav_'+cat.toLowerCase()+'_mgmt'] || (cat === 'ALL' ? translations['nav_dashboard'] : cat);
+            // Kategoriye özel alt başlık
+            const subtitleEl = document.getElementById('contentSubtitle');
+            const subtitleMap = { 'ISO_WIN': 'subtitle_iso_win', 'ISO_LINUX': 'subtitle_iso_linux' };
+            const subtitleKey = subtitleMap[cat];
+            if (subtitleKey && translations[subtitleKey]) {
+                subtitleEl.innerHTML = translations[subtitleKey].replace(/\\n/g, '<br>');
+                subtitleEl.style.display = 'block';
+            } else {
+                subtitleEl.style.display = 'none';
+            }
+            fetchFiles();
+        }
+
+        function showDhcp() {
+            currentView = 'dhcp';
+            document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+            document.getElementById('nav-dhcp').classList.add('active');
+
+            document.querySelector('.stats-grid').style.display = 'none';
+            if (document.getElementById('bootSettingsCard')) document.getElementById('bootSettingsCard').style.display = 'none';
+            
+            const mainCard = document.getElementById('mainTableCard');
+            if (mainCard) mainCard.style.display = 'none';
+
+            document.getElementById('section-dhcp').style.display = 'block';
+            
+            document.getElementById('dhcpConfigIP').value = document.getElementById('serverIP').value || '192.168.1.1';
+            updateDhcpPreview();
+        }
+
+        function updateDhcpPreview() {
+            const ip = document.getElementById('dhcpConfigIP').value || '...';
+            document.getElementById('previewIpxeUrl').innerText = `http://${ip}/autoexec.ipxe`;
+        }
+
+        async function fetchFiles() {
+            try {
+                const r = await fetch('/api/files'); 
+                currentFiles = await r.json();
+            } catch(e) {
+                console.warn("API/Local mode: Dosyalar alınamadı.");
+                if(currentFiles.length === 0) currentFiles = []; 
+            }
+            
+            let win = 0, lin = 0, wim = 0;
+            currentFiles.forEach(f => {
+                if(f.type === 'ISO_WIN') win++;
+                else if(f.type === 'ISO_LINUX') lin++;
+                else if(f.type === 'WIM' || f.type === 'WIM_MODIFIED') wim++;
+            });
+            document.getElementById('countISOWin').innerText = win;
+            document.getElementById('countISOLinux').innerText = lin;
+            document.getElementById('countWIM').innerText = wim;
+
+            const container = document.getElementById('tablesContainer');
+            container.innerHTML = '';
+
+            const groups = [
+                { id: 'WIM', title: translations['group_wim'] || 'WinPE (WIM)', icon: 'fa-solid fa-hard-drive', color: '#3b82f6', bg: 'rgba(59,130,246,0.1)' },
+                { id: 'ISO_WIN', title: translations['group_win'] || 'Windows Setup (ISO)', icon: 'fa-brands fa-windows', color: 'var(--primary)', bg: 'rgba(20,184,166,0.1)' },
+                { id: 'ISO_LINUX', title: translations['group_linux'] || 'Linux Setup (ISO)', icon: 'fa-brands fa-linux', color: '#f59e0b', bg: 'rgba(245,158,11,0.1)' }
+            ];
+
+            groups.forEach(g => {
+                if (currentCategory !== 'ALL' && currentCategory !== g.id) return;
+
+                const filesInGroup = currentFiles.filter(f => {
+                    if (g.id === 'WIM') return f.type === 'WIM' || f.type === 'WIM_MODIFIED';
+                    return f.type === g.id;
+                });
+                if (filesInGroup.length === 0 && currentCategory === 'ALL') return;
+
+                const tableWrap = document.createElement('div');
+                tableWrap.className = 'group-table-wrap';
+                
+                if (currentCategory === 'ALL') {
+                    tableWrap.innerHTML = `<h3 class="group-title"><i class="${g.icon}" style="color:${g.color}; margin-right:10px; font-size:16px;"></i>${g.title}</h3>`;
+                }
+
+                const table = document.createElement('table');
+                table.innerHTML = `
+                    <thead>
+                        <tr>
+                            <th style="width:30px;"></th>
+                            <th data-i18n="table_name">${translations['table_name'] || 'Ad'}</th>
+                            <th data-i18n="table_alias">${translations['table_alias'] || 'Açıklama'}</th>
+                            <th data-i18n="table_size">${translations['table_size'] || 'Boyut'}</th>
+                            <th data-i18n="table_action">${translations['table_action'] || 'İşlem'}</th>
+                        </tr>
+                    </thead>
+                    <tbody class="drag-zone" data-group="${g.id}"></tbody>
+                `;
+
+                const tbody = table.querySelector('tbody');
+                filesInGroup.forEach(f => {
+                    const safeName = f.name.replace(/'/g, "\\'");
+                    const safeAlias = f.alias.replace(/'/g, "\\'");
+                    const itemId = 'boot_' + f.type.toLowerCase() + '_' + f.name.replace(/\./g,'_').replace(/ /g,'_');
+                    const isDefault = (window._currentDefault === itemId || window._currentDefault === f.name);
+                    const starClass = isDefault ? 'btn-set-default active' : 'btn-set-default';
+                    const starTitle = isDefault ? (translations['tip_is_default'] || 'Varsayılan') : (translations['tip_set_default'] || 'Varsayılan yap');
+                    
+                    const tr = document.createElement('tr');
+                    tr.setAttribute('draggable', 'true');
+                    tr.dataset.name = f.name;
+                    tr.dataset.itemId = itemId;
+                    tr.dataset.group = g.id;
+                    
+                    const isModWim   = (f.type === 'WIM_MODIFIED');
+                    const isWinSetup = (f.type === 'ISO_WIN');
+                    const isLinux    = (f.type === 'ISO_LINUX');
+                    const hasDav     = isModWim || isWinSetup;
+                    const badgeBg = isModWim ? 'rgba(245,158,11,0.15)' : g.bg;
+                    const badgeColor = isModWim ? '#f59e0b' : g.color;
+                    const badgeTitle = isModWim ? (translations['badge_wim_modified'] || 'Modified WinPE (ISO)') : g.title;
+                    const typeBadge = `<span style="font-size:10px; padding:3px 6px; border-radius:4px; background:${badgeBg}; color:${badgeColor}; margin-left:8px; vertical-align:middle; font-weight:600;">${badgeTitle}</span>`;
+                    const rowIcon = isModWim ? 'fa-solid fa-screwdriver-wrench' : g.icon;
+                    const rowColor = isModWim ? '#f59e0b' : g.color;
+
+                    const browseBtn = hasDav
+                        ? `<button class="action-btn" onclick="window.open('/dav/${safeName}/','_blank')" style="color:var(--primary);background:none;border:none;cursor:pointer;font-size:15px;" title="${translations['tip_browse_iso']||'Browse ISO'}"><i class="fa-solid fa-folder-open"></i></button>`
+                        : isLinux
+                            ? `<button class="action-btn" onclick="window.open('/ISO/Linux/${safeName}/','_blank')" style="color:var(--primary);background:none;border:none;cursor:pointer;font-size:15px;" title="${translations['tip_browse_iso']||'Browse ISO'}"><i class="fa-solid fa-folder-open"></i></button>`
+                            : '';
+                    const logBtn = (hasDav || isLinux)
+                        ? `<button class="action-btn" onclick="viewLog('${safeName}')" style="color:#888;background:none;border:none;cursor:pointer;font-size:15px;" title="${translations['tip_view_log']||'View Log'}"><i class="fa-solid fa-scroll"></i></button>`
+                        : '';
+                    const unattendBtn = isWinSetup
+                        ? `<button class="action-btn" onclick="uploadUnattend('${safeName}')" style="color:#a78bfa;background:none;border:none;cursor:pointer;font-size:15px;" title="${translations['tip_upload_unattend']||'Upload Unattend XML'}"><i class="fa-solid fa-file-code"></i></button>`
+                        : '';
+
+                    tr.innerHTML = `
+                        <td style="width:30px;"><i class="fa-solid fa-grip-vertical drag-handle" title="${translations['tip_drag']||'Drag to reorder'}"></i></td>
+                        <td><i class="${rowIcon}" style="color:${rowColor}; margin-right:10px; font-size:16px;"></i><b>${f.name}</b>${currentCategory === 'ALL' && !isModWim ? '' : typeBadge}</td>
+                        <td class="alias-cell">${f.alias}<i class="fa-solid fa-pen-to-square edit-icon action-btn" onclick="editAlias('${safeName}','${safeAlias}')" title="${translations['tip_edit_alias']||'Edit alias'}"></i></td>
+                        <td>${f.size}</td>
+                        <td>
+                            <button class="${starClass}" onclick="setDefault('${itemId}', this)" title="${starTitle}"><i class="fa-solid fa-star"></i></button>
+                            ${browseBtn}${logBtn}${unattendBtn}
+                            <button class="action-btn" onclick="deleteFile('${safeName}')" style="color:var(--danger);background:none;border:none;cursor:pointer;font-size:16px;" title="${translations['msg_confirm_delete']||'Delete'}"><i class="fa-solid fa-trash"></i></button>
+                        </td>`;
+                    tbody.appendChild(tr);
+                });
+
+                tableWrap.appendChild(table);
+                container.appendChild(tableWrap);
+            });
+            
+            updateDefaultSelect();
+            initDragAndDrop();
+        }
+
+        function updateDefaultSelect() {
+            const sel = document.getElementById('defaultBootSelect');
+            if (!sel) return;
+            while (sel.options.length > 1) sel.remove(1);
+            currentFiles.forEach(f => {
+                const itemId = 'boot_' + f.type.toLowerCase() + '_' + f.name.replace(/\./g,'_').replace(/ /g,'_');
+                const opt = document.createElement('option');
+                opt.value = itemId;
+                opt.textContent = f.alias || f.name;
+                if (window._currentDefault === itemId) opt.selected = true;
+                sel.appendChild(opt);
+            });
+            if (window._currentDefault === 'HDD') sel.value = 'HDD';
+        }
+
+        async function saveBootSettings() {
+            const defaultBoot = document.getElementById('defaultBootSelect').value;
+            const countdown = parseInt(document.getElementById('countdownInput').value) || 0;
+            window._currentDefault = defaultBoot;
+            try {
+                await fetch('/api/boot_settings', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ default_boot: defaultBoot, countdown: countdown })
+                });
+            } catch(e) { console.warn(e); }
+            
+            document.querySelectorAll('.btn-set-default').forEach(btn => {
+                const itemId = btn.closest('tr').dataset.itemId;
+                btn.classList.toggle('active', itemId === defaultBoot);
+            });
+            showToast(translations['msg_done'] || 'Done!');
+        }
+
+        async function setDefault(itemId, btn) {
+            window._currentDefault = itemId;
+            document.getElementById('defaultBootSelect').value = itemId;
+            await saveBootSettings();
+        }
+
+        function initDragAndDrop() {
+            const dragZones = document.querySelectorAll('.drag-zone');
+            let dragSrc = null;
+
+            dragZones.forEach(tbody => {
+                tbody.querySelectorAll('tr[draggable]').forEach(row => {
+                    let _dragAllowed = false;
+                    row.querySelector('.drag-handle')?.addEventListener('mousedown', () => { _dragAllowed = true; });
+                    document.addEventListener('mouseup', () => { _dragAllowed = false; }, { once: false });
+                    row.addEventListener('dragstart', e => {
+                        if (!_dragAllowed) { e.preventDefault(); return; }
+                        dragSrc = row;
+                        e.dataTransfer.effectAllowed = 'move';
+                        row.style.opacity = '0.5';
+                    });
+                    row.addEventListener('dragend', () => {
+                        row.style.opacity = '1';
+                        document.querySelectorAll('tr').forEach(r => r.classList.remove('drag-over'));
+                        dragSrc = null;
+                    });
+                    row.addEventListener('dragover', e => {
+                        e.preventDefault();
+                        if (dragSrc && dragSrc.dataset.group === row.dataset.group) {
+                            e.dataTransfer.dropEffect = 'move';
+                            document.querySelectorAll('tr').forEach(r => r.classList.remove('drag-over'));
+                            if (row !== dragSrc) row.classList.add('drag-over');
+                        } else {
+                            e.dataTransfer.dropEffect = 'none'; 
+                        }
+                    });
+                    row.addEventListener('drop', async e => {
+                        e.preventDefault();
+                        row.classList.remove('drag-over');
+                        
+                        if (dragSrc && dragSrc !== row && dragSrc.dataset.group === row.dataset.group) {
+                            const currentTbody = row.closest('tbody');
+                            const rows = Array.from(currentTbody.querySelectorAll('tr'));
+                            const srcIdx = rows.indexOf(dragSrc);
+                            const tgtIdx = rows.indexOf(row);
+                            if (srcIdx < tgtIdx) row.after(dragSrc);
+                            else row.before(dragSrc);
+
+                            const allRows = Array.from(document.querySelectorAll('#tablesContainer tr[draggable]'));
+                            const newOrder = allRows.map(r => r.dataset.name);
+                            window._currentFileOrder = newOrder;
+                            
+                            const sortedFiles = [];
+                            newOrder.forEach(name => {
+                                const found = currentFiles.find(f => f.name === name);
+                                if (found) sortedFiles.push(found);
+                            });
+                            currentFiles.forEach(f => {
+                                if (!newOrder.includes(f.name)) sortedFiles.push(f);
+                            });
+                            currentFiles = sortedFiles;
+
+                            try {
+                                await fetch('/api/reorder', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ order: newOrder })
+                                });
+                            } catch(e) { console.warn(e); }
+                            showToast(translations['msg_done'] || 'Done!');
+                        }
+                    });
+                });
+            });
+        }
+
+        function validateFilename() {
+            const val = document.getElementById('modalFilename').value.trim(); const btn = document.getElementById('startUploadBtn');
+            const exists = currentFiles.some(f => f.name.toLowerCase() === (currentCategory.startsWith('ISO') ? val+".iso" : val).toLowerCase());
+            const space = val.includes(' ');
+            document.getElementById('filenameErrorExists').style.display = exists ? 'block' : 'none';
+            document.getElementById('filenameError').style.display = space ? 'block' : 'none';
+            btn.disabled = (exists || space || !val); btn.style.opacity = btn.disabled ? '0.5' : '1';
+        }
+
+        function triggerUpload(forceCategory) {
+            window._uploadCategory = forceCategory || currentCategory;
+            const i = document.getElementById('fileUpload');
+            if (window._uploadCategory === 'WIM_MODIFIED') {
+                i.accept = '.iso';
+            } else {
+                i.accept = currentCategory === 'WIM' ? '.wim' : '.iso';
+            }
+            i.value = '';
+            i.click();
+        }
+        function handleFile(i) {
+            if (!i.files[0]) return; uploadFileHandle = i.files[0];
+            const clean = uploadFileHandle.name.split('.')[0].replace(/\s+/g,'_');
+            document.getElementById('modalAlias').value = uploadFileHandle.name.split('.')[0];
+            document.getElementById('modalFilename').value = clean;
+            
+            const label = document.getElementById('folderLabel');
+            const key = currentCategory === 'WIM' ? 'modal_folder_name' : 'modal_filename';
+            if (translations[key]) label.innerText = translations[key];
+            
+            document.getElementById('uploadModal').style.display = 'flex'; validateFilename();
+        }
+
+        async function editAlias(n, o) {
+            const a = prompt(translations['msg_edit_alias_prompt'] || "Yeni Açıklama:", o);
+            if (a === null || a === o) return;
+            showToast(translations['msg_processing'] || "Processing...", true);
+            try {
+                await fetch('/api/edit_alias', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({name:n, alias:a}) });
+            } catch(e) { console.warn(e); }
+            showToast(translations['msg_updated'] || "Güncellendi"); fetchFiles();
+        }
+
+        async function deleteFile(n) {
+            if (_busyOp) { showToast(translations['msg_processing'] || 'Please wait...', true); return; }
+            if (confirm(translations['msg_confirm_delete'] || "Are you sure?")) {
+                showToast(translations['msg_processing'] || 'Deleting, please wait...', true);
+                try {
+                    await fetch('/api/delete', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({name:n})});
+                } catch(e) { console.warn(e); }
+                showToast(translations['msg_deleted'] || 'Deleted.');
+                fetchFiles();
+            }
+        }
+
+        async function saveSettings() {
+            showToast(translations['msg_settings_saving'] || "Kaydediliyor...", true);
+            const defaultBoot = document.getElementById('defaultBootSelect') ? document.getElementById('defaultBootSelect').value : 'HDD';
+            const countdown = document.getElementById('countdownInput') ? parseInt(document.getElementById('countdownInput').value) || 0 : 10;
+            try {
+                await fetch('/api/settings/set', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({
+                    domain: document.getElementById('serverIP').value,
+                    language: document.getElementById('langSelect').value,
+                    theme: document.body.classList.contains('dark')?'dark':'light',
+                    default_boot: defaultBoot,
+                    countdown: countdown
+                }) });
+            } catch(e) { console.warn(e); }
+            showToast(translations['msg_settings_saved'] || "Ayarlar Kaydedildi!");
+        }
+
+        async function toggleServer() {
+            const isOff = document.getElementById('serverStatusText').innerText === "Offline" || document.getElementById('serverStatusText').innerText === translations['status_offline'];
+            showToast(translations['msg_processing'] || "Processing...", true);
+            try {
+                await fetch(isOff ? '/api/server/start' : '/api/server/stop', { method:'POST' });
+            } catch(e) { console.warn(e); }
+            setTimeout(updateStats, 1500);
+            showToast(translations['msg_done'] || "Done!");
+        }
+
+        function toggleTheme() { document.body.classList.toggle('dark'); const i = document.querySelector('#themeBtn i'); i.className = document.body.classList.contains('dark') ? "fa-solid fa-sun" : "fa-solid fa-moon"; }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+        function showConnectionsModal() {
+            const l = document.getElementById('connList');
+            l.innerHTML = lastClients.length ? lastClients.map(ip => `<div style="padding:10px; background:rgba(20,184,166,0.1); margin-bottom:5px; border-radius:8px;">${ip}</div>`).join('') : (translations['msg_no_connections'] || "Aktif bağlantı yok.");
+            document.getElementById('connModal').style.display = 'flex';
+        }
+
+        function showShutdownModal() { document.getElementById('shutdownModal').style.display = 'flex'; }
+
+        function confirmShutdown() {
+            const btn = document.querySelector('.btn-confirm-sd'); btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i>'; btn.disabled = true;
+            fetch('/api/app/shutdown', {method:'POST'}).catch(e => console.warn(e));
+            const isDark = document.body.classList.contains('dark');
+            const bgColor = isDark ? '#0b0f19' : '#f8fafc';
+            const txtColor = isDark ? 'white' : '#1e293b';
+            document.body.innerHTML = `
+                <div style="height:100vh; width:100vw; display:flex; flex-direction:column; align-items:center; justify-content:center; background:${bgColor}; color:${txtColor}; font-family:'Inter', sans-serif; text-align:center; padding:20px; position:fixed; top:0; left:0; z-index:99999;">
+                    <div style="width:90px; height:90px; border-radius:50%; background:rgba(239,68,68,0.1); display:flex; align-items:center; justify-content:center; margin-bottom:30px;">
+                        <i class="fa-solid fa-power-off" style="font-size:38px; color:#ef4444;"></i>
+                    </div>
+                    <h1 style="font-size:32px; font-weight:800; margin-bottom:10px;">${translations['shutdown_done_title'] || 'Sistem Kapatıldı'}</h1>
+                    <p style="font-size:18px; color:#64748b; max-width:500px; line-height:1.6;">${translations['shutdown_done_desc'] || 'Sunucu başarıyla durduruldu. Bu pencereyi artık güvenle kapatabilirsiniz.'}</p>
+                </div>`;
+        }
+
+        window.onload = init;
+
+        const DHCP_BATCH_TEMPLATE = `<# :
+@echo off
+
+:: iPXE Deployment DHCP Policy Setup Tool
+:: Server-Level Only | Active Directory Support
+:: This script must be run on the local DHCP server
+
+:: This script file was created by Abdullah ERTURK.
+:: github.com/abdullah-erturk - erturk-dev.netlify.app/run
+
+setlocal
+echo ======================================================
+echo    iPXE DHCP POLICY SETUP TOOL
+echo ======================================================
+echo.
+net session >nul 2>&1
+if %errorLevel% neq 0 ( echo [ERROR] Please run as ADMINISTRATOR. ^& pause ^& exit /b )
+powershell -NoProfile -ExecutionPolicy Bypass -Command "iex ((Get-Content '%~f0') -join [char]10)"
+echo.
+echo ======================================================
+echo    SETUP COMPLETED
+echo ======================================================
+pause
+exit /b
+#>
+
+# ======================================================
+#   CONFIGURATION  — edit these values if needed
+# ======================================================
+$iPxeServer = "{{SERVER_IP}}"
+$BiosFile   = "ipxe-legacy.pxe"
+$EfiFile    = "bootx64.efi"
+$ScriptUrl  = "http://{{SERVER_IP}}/autoexec.ipxe"
+
+Import-Module DHCPServer -ErrorAction SilentlyContinue
+
+# ======================================================
+#   PRE-FLIGHT CHECK
+# ======================================================
+Write-Host "\`n [*] Pre-flight checks..." -ForegroundColor Cyan
+
+# 1. Must be Windows Server
+$osInfo = Get-CimInstance -ClassName Win32_OperatingSystem -ErrorAction SilentlyContinue
+if (-not $osInfo -or $osInfo.Caption -notmatch "Server") {
+    Write-Host " [ERROR] This script must be run on Windows Server." -ForegroundColor Red
+    Write-Host "         Detected OS : $($osInfo.Caption)" -ForegroundColor Yellow
+    Read-Host "\`n Press Enter to exit"; exit 1
+}
+Write-Host " [OK] OS             : $($osInfo.Caption)" -ForegroundColor Green
+
+# 2. DHCP Server role must be installed
+$dhcpFeature = Get-WindowsFeature -Name DHCP -ErrorAction SilentlyContinue
+if (-not $dhcpFeature -or $dhcpFeature.InstallState -ne "Installed") {
+    Write-Host " [ERROR] DHCP Server role is not installed on this machine." -ForegroundColor Red
+    Read-Host "\`n Press Enter to exit"; exit 1
+}
+Write-Host " [OK] DHCP role      : Installed." -ForegroundColor Green
+
+# 3. DHCPServer service must be running
+$dhcpService = Get-Service -Name DHCPServer -ErrorAction SilentlyContinue
+if (-not $dhcpService) {
+    Write-Host " [ERROR] DHCPServer service not found." -ForegroundColor Red
+    Read-Host "\`n Press Enter to exit"; exit 1
+}
+if ($dhcpService.Status -ne "Running") {
+    Write-Host " [!] DHCPServer not running. Starting..." -ForegroundColor Yellow
+    try {
+        Start-Service -Name DHCPServer -ErrorAction Stop
+        Start-Sleep -Seconds 3
+        Write-Host " [OK] DHCPServer started." -ForegroundColor Green
+    } catch {
+        Write-Host " [ERROR] Could not start DHCPServer: $($_.Exception.Message)" -ForegroundColor Red
+        Read-Host "\`n Press Enter to exit"; exit 1
+    }
+} else {
+    Write-Host " [OK] DHCPServer     : Running on $($env:COMPUTERNAME)." -ForegroundColor Green
+}
+
+Write-Host " [OK] All pre-flight checks passed.\`n" -ForegroundColor Green
+
+# ======================================================
+#   STEP 1 - CLEANUP
+# ======================================================
+Write-Host " [*] Cleaning up old policies and classes..." -ForegroundColor Cyan
+
+try { Remove-DhcpServerv4OptionValue -OptionId 60 -ErrorAction SilentlyContinue } catch {}
+
+$oldPolicies = @(
+    "PXE EFI", "PXE Legacy", "iPXE Boot Policy",
+    "iPXE-Legacy", "iPXE-EFI", "iPXE-EFI-alt",
+    "iPXE EFI", "iPXE EFI alt", "iPXE Legacy",
+    "PXEClient (BIOS x86 & x64)", "UEFI 64-Bit DHCP Policy", "UEFI 64-Bit DHCP Policy (alt)"
+)
+foreach ($name in $oldPolicies) {
+    try {
+        Remove-DhcpServerv4Policy -Name $name -ErrorAction SilentlyContinue
+        Write-Host " [-] Removed policy : $name" -ForegroundColor Gray
+    } catch {}
+}
+
+$oldClasses = @(
+    @{ Name="PXE Client (UEFI x64)";      Type="Vendor" },
+    @{ Name="PXE Client (MBR x86 - x64)"; Type="Vendor" },
+    @{ Name="PXEClient-BIOS";             Type="Vendor" },
+    @{ Name="PXEClient-EFI-x64";          Type="Vendor" },
+    @{ Name="PXEClient-EFI-x64-alt";      Type="Vendor" },
+    @{ Name="PXEClient (BIOS x86 & x64)"; Type="Vendor" },
+    @{ Name="PXEClient (UEFI x64)";       Type="Vendor" },
+    @{ Name="PXEClient (UEFI x64 alt)";   Type="Vendor" },
+    @{ Name="iPXE";                       Type="User"   }
+)
+foreach ($cls in $oldClasses) {
+    try {
+        Remove-DhcpServerv4Class -Name $cls.Name -Type $cls.Type -ErrorAction SilentlyContinue
+        Write-Host " [-] Removed class  : $($cls.Name)" -ForegroundColor Gray
+    } catch {}
+}
+
+Write-Host " [*] Waiting for DHCP to release resources..." -ForegroundColor Gray
+Start-Sleep -Seconds 3
+
+# ======================================================
+#   STEP 2 - VENDOR & USER CLASSES  (netsh binary mode)
+# ======================================================
+Write-Host "\`n [*] Creating classes via netsh (binary mode)..." -ForegroundColor Cyan
+
+$classes = @(
+    @{ Name="PXE Client (UEFI x64)";      Comment="PXEClient:Arch:00007"; Data="505845436c69656e743a417263683a3030303037"; IsVendor=1 },
+    @{ Name="PXE Client (MBR x86 - x64)"; Comment="PXEClient:Arch:00000"; Data="505845436c69656e743a417263683a3030303030"; IsVendor=1 },
+    @{ Name="iPXE";                       Comment="iPXE chainloaded client"; Data="69505845"; IsVendor=0 }
+)
+
+foreach ($cls in $classes) {
+    $result = (& netsh dhcp server add class "$($cls.Name)" "$($cls.Comment)" $cls.Data $cls.IsVendor b 2>&1) -join " "
+    if ($result -match "completed successfully") {
+        Write-Host " [OK] Class created : $($cls.Name)" -ForegroundColor Green
+    } else {
+        Write-Host " [!] $($cls.Name) : $result" -ForegroundColor Yellow
+    }
+}
+
+# Verify iPXE user class data
+$ipxeClass = Get-DhcpServerv4Class -Type User -ErrorAction SilentlyContinue |
+    Where-Object { $_.Name -eq "iPXE" }
+if ($ipxeClass.AsciiData -eq "iPXE") {
+    Write-Host " [OK] iPXE class verified : AsciiData = 'iPXE'" -ForegroundColor Green
+} else {
+    Write-Host " [!] iPXE class data mismatch : AsciiData = '$($ipxeClass.AsciiData)' (expected 'iPXE')" -ForegroundColor Yellow
+}
+
+# ======================================================
+#   STEP 3 - OPTION DEFINITION 60
+# ======================================================
+Write-Host "\`n [*] Adding Option Definition 60 (PXEClient)..." -ForegroundColor Cyan
+
+$optResult = (& netsh dhcp server add optiondef 60 "PXEClient" STRING 0 comment="Option added for PXE support" "" 2>&1) -join " "
+if ($optResult -match "completed successfully") {
+    Write-Host " [OK] Option 60 defined." -ForegroundColor Green
+} else {
+    Write-Host " [!] Option 60 : $optResult" -ForegroundColor Yellow
+}
+
+# ======================================================
+#   STEP 4 - POLICIES
+# ======================================================
+Write-Host "\`n [*] Creating policies..." -ForegroundColor Cyan
+
+$policies = @(
+    @{
+        Name            = "PXE EFI"
+        Description     = "EFI x64"
+        ProcessingOrder = 1
+        Condition       = "OR"
+        ClassType       = "Vendor"
+        ClassName       = "PXE Client (UEFI x64)*"
+        Options         = @(
+            @{ Id=60; Value="PXE EFI x64" },
+            @{ Id=66; Value=$iPxeServer   },
+            @{ Id=67; Value=$EfiFile      }
+        )
+    },
+    @{
+        Name            = "PXE Legacy"
+        Description     = "PXE MBR"
+        ProcessingOrder = 2
+        Condition       = "OR"
+        ClassType       = "Vendor"
+        ClassName       = "PXE Client (MBR x86 - x64)*"
+        Options         = @(
+            @{ Id=60; Value="PXE MBR"   },
+            @{ Id=66; Value=$iPxeServer },
+            @{ Id=67; Value=$BiosFile   }
+        )
+    },
+    @{
+        Name            = "iPXE Boot Policy"
+        Description     = "Sends HTTP script URL to iPXE clients"
+        ProcessingOrder = 3
+        Condition       = "OR"
+        ClassType       = "User"
+        ClassName       = "iPXE"
+        Options         = @(
+            @{ Id=66; Value=$iPxeServer },
+            @{ Id=67; Value=$ScriptUrl  }
+        )
+    }
+)
+
+foreach ($p in $policies) {
+    $existing = Get-DhcpServerv4Policy -Name $p.Name -ErrorAction SilentlyContinue
+    if (-not $existing) {
+        try {
+            $addParams = @{
+                Name            = $p.Name
+                Description     = $p.Description
+                ProcessingOrder = $p.ProcessingOrder
+                Condition       = $p.Condition
+                Enabled         = $true
+                Confirm         = $false
+                ErrorAction     = "Stop"
+            }
+            if ($p.ClassType -eq "Vendor") {
+                $addParams["VendorClass"] = @("EQ", $p.ClassName)
+            } else {
+                $addParams["UserClass"] = @("EQ", $p.ClassName)
+            }
+            Add-DhcpServerv4Policy @addParams
+            Write-Host " [OK] Policy created : '$($p.Name)'" -ForegroundColor Green
+        } catch {
+            Write-Host " [ERROR] Policy '$($p.Name)': $($_.Exception.Message)" -ForegroundColor Red
+            continue
+        }
+    } else {
+        Write-Host " [--] Policy exists  : '$($p.Name)'" -ForegroundColor Yellow
+    }
+
+    foreach ($opt in $p.Options) {
+        try {
+            Set-DhcpServerv4OptionValue -PolicyName $p.Name -OptionId $opt.Id -Value $opt.Value -Force -ErrorAction Stop
+            Write-Host " [OK] Option set     : $($opt.Id) = $($opt.Value) -> '$($p.Name)'" -ForegroundColor Green
+        } catch {
+            Write-Host " [ERROR] Option $($opt.Id) for '$($p.Name)': $($_.Exception.Message)" -ForegroundColor Red
+        }
+    }
+}
+
+# ======================================================
+#   STEP 5 - RESTART DHCP
+# ======================================================
+Write-Host "\`n [*] Restarting DHCPServer service..." -ForegroundColor Cyan
+try {
+    Restart-Service -Name DHCPServer -Force -ErrorAction Stop
+    Write-Host " [OK] DHCPServer restarted." -ForegroundColor Green
+} catch {
+    Write-Host " [ERROR] $($_.Exception.Message)" -ForegroundColor Red
+}
+
+# ======================================================
+#   SUMMARY
+# ======================================================
+Write-Host "\`n [*] Summary:" -ForegroundColor Cyan
+
+$finalClasses = @(Get-DhcpServerv4Class -ErrorAction SilentlyContinue)
+Write-Host " [i] Classes ($($finalClasses.Count)):" -ForegroundColor Cyan
+foreach ($cls in $finalClasses) {
+    Write-Host "     [$($cls.Type.PadRight(6))] $($cls.Name) | AsciiData: $($cls.AsciiData)" -ForegroundColor Gray
+}
+
+$finalPolicies = @(Get-DhcpServerv4Policy -ErrorAction SilentlyContinue)
+Write-Host " [i] Policies ($($finalPolicies.Count)):" -ForegroundColor Cyan
+foreach ($p in $finalPolicies) {
+    Write-Host "     [Order $($p.ProcessingOrder)] $($p.Name)" -ForegroundColor Gray
+}
+
+Write-Host "\`n[ SUCCESS ] iPXE Boot Chain configured on $($env:COMPUTERNAME)." -ForegroundColor White -BackgroundColor DarkGreen
+Write-Host ""
+Write-Host "  Boot flow:" -ForegroundColor White
+Write-Host "  [PXE BIOS] --TFTP--> $BiosFile ---> iPXE --DHCP--> $ScriptUrl" -ForegroundColor Cyan
+Write-Host "  [PXE EFI ] --TFTP--> $EfiFile  ---> iPXE --DHCP--> $ScriptUrl" -ForegroundColor Cyan
+Write-Host ""
+`;
+
+        const FIREWALL_BATCH_TEMPLATE = `<# :
+@echo off
+title iPXE Firewall Rule Setup Tool
+
+:: iPXE Firewall Rule Setup Tool
+:: This script file was created by Abdullah ERTURK.
+:: github.com/abdullah-erturk - erturk-dev.netlify.app
+
+echo ======================================================
+echo    iPXE FIREWALL RULE CONFIGURATION TOOL
+echo ======================================================
+echo.
+
+:: Check for Administrator Privileges
+net session >nul 2>&1
+if %errorLevel% neq 0 (
+    echo [ERROR] Please run this script as ADMINISTRATOR.
+    pause
+    exit /b
+)
+
+powershell -NoProfile -ExecutionPolicy Bypass -Command "iex ((Get-Content '%~f0') -join \\"\`n\\")"
+
+echo.
+echo ======================================================
+echo    CONFIGURATION COMPLETED
+echo ======================================================
+pause
+exit /b
+#>
+
+# --- PowerShell Start ---
+
+Write-Host "\`n [*] Configuring iPXE firewall rules..." -ForegroundColor Cyan
+
+$firewallRules = @(
+    @{ Name="iPXE Server HTTP (80)";       Protocol="TCP"; Port=80   },
+    @{ Name="iPXE Server HTTP (8080)";     Protocol="TCP"; Port=8080 },
+    @{ Name="iPXE - DHCP (UDP 67)";        Protocol="UDP"; Port=67   },
+    @{ Name="iPXE - DHCP (UDP 68)";        Protocol="UDP"; Port=68   },
+    @{ Name="iPXE - TFTP (UDP 69)";        Protocol="UDP"; Port=69   },
+    @{ Name="iPXE - ProxyDHCP (UDP 4011)"; Protocol="UDP"; Port=4011 },
+    @{ Name="iPXE - HTTP UDP (80)";        Protocol="UDP"; Port=80   }
+)
+
+foreach ($rule in $firewallRules) {
+    $existing = Get-NetFirewallRule -DisplayName $rule.Name -ErrorAction SilentlyContinue
+    if ($existing) {
+        Remove-NetFirewallRule -DisplayName $rule.Name -ErrorAction SilentlyContinue
+        Write-Host " [-] Removed existing rule: $($rule.Name)" -ForegroundColor Gray
+    }
+    try {
+        New-NetFirewallRule \`
+            -DisplayName $rule.Name \`
+            -Direction Inbound \`
+            -Protocol $rule.Protocol \`
+            -LocalPort $rule.Port \`
+            -Action Allow \`
+            -Profile Any \`
+            -ErrorAction Stop | Out-Null
+        Write-Host " [OK] Firewall rule added: $($rule.Name) ($($rule.Protocol) $($rule.Port))" -ForegroundColor Green
+    } catch {
+        Write-Host " [ERROR] Could not add firewall rule '$($rule.Name)': $($_.Exception.Message)" -ForegroundColor Red
+    }
+}
+
+Write-Host "\`n[ SUCCESS ] iPXE firewall rules configured successfully." -ForegroundColor White -BackgroundColor DarkGreen
+`;
+
+        async function downloadDhcpPolicy() {
+            const ip = document.getElementById('dhcpConfigIP').value.trim(); if(!ip) { showToast(translations['placeholder_ip'] || "IP ERROR", false); return; }
+            showToast(translations['msg_processing'] || "Processing...", true); let content = DHCP_BATCH_TEMPLATE.split('{{SERVER_IP}}').join(ip);
+            const blob = new Blob([content], { type: 'text/plain' }); const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url; a.download = 'iPXE_DHCP_Policy.bat';
+            document.body.appendChild(a); a.click(); window.URL.revokeObjectURL(url); document.body.removeChild(a);
+            showToast(translations['msg_done'] || "Done!");
+        }
+
+        async function downloadFirewallPolicy() {
+            showToast(translations['msg_processing'] || "Processing...", true);
+            const blob = new Blob([FIREWALL_BATCH_TEMPLATE], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url; a.download = 'iPXE_Firewall.bat';
+            document.body.appendChild(a); a.click(); window.URL.revokeObjectURL(url); document.body.removeChild(a);
+            showToast(translations['msg_done'] || "Done!");
+        }
+    </script>
+</body>
+</html>

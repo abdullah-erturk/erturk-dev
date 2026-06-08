@@ -6,7 +6,6 @@
     "icon": "fa-solid fa-network-wired",
     "cards": [
       {
-        "pinOrder": 1,
         "title": "iPXE Manager — Network HTTP Boot",
         "icon": "fa-solid fa-network-wired",
         "desc_tr": "HTTP üzerinden ağ önyüklemesi sağlayan iPXE yönetim aracı. WinPE ve Live ortamları için idealdir.",
@@ -15,8 +14,14 @@
           {
             "type": "github",
             "url": "https://github.com/abdullah-erturk/iPXE-Manager"
+          },
+          {
+            "type": "info",
+            "url": "https://erturk-dev.netlify.app/ipxe_demo.html",
+            "text": "Demo"
           }
-        ]
+        ],
+        "pinOrder": 1
       },
       {
         "title": "Ping Monitor Enterprise",
@@ -75,30 +80,6 @@
           {
             "type": "github",
             "url": "https://github.com/abdullah-erturk/iPXE-iso-efi-mbr-secureboot-support-"
-          }
-        ]
-      },
-      {
-        "title": "RustDesk ID Changer",
-        "icon": "fa-solid fa-id-card",
-        "desc_tr": "RustDesk uzak masaüstü uygulamasının benzersiz cihaz kimliğini kolayca değiştirmeye yarayan araç.",
-        "desc_en": "A tool for easily changing the unique device ID of the RustDesk remote desktop application.",
-        "links": [
-          {
-            "type": "github",
-            "url": "https://github.com/abdullah-erturk/RustDesk-ID-Changer"
-          }
-        ]
-      },
-      {
-        "title": "RustDesk Silent Installation",
-        "icon": "fa-solid fa-volume-xmark",
-        "desc_tr": "RustDesk'i kullanıcıya herhangi bir bildirim göstermeden sessizce yükleyen otomasyon betiği.",
-        "desc_en": "An automation script that silently installs RustDesk without showing any notifications to the user.",
-        "links": [
-          {
-            "type": "github",
-            "url": "https://github.com/abdullah-erturk/RustDesk-Silent-Installation"
           }
         ]
       }
@@ -288,6 +269,30 @@
           {
             "type": "github",
             "url": "https://github.com/abdullah-erturk/Academia-Scribd-Downloader"
+          }
+        ]
+      },
+      {
+        "title": "RustDesk ID Changer",
+        "icon": "fa-solid fa-id-card",
+        "desc_tr": "RustDesk uzak masaüstü uygulamasının benzersiz cihaz kimliğini kolayca değiştirmeye yarayan araç.",
+        "desc_en": "A tool for easily changing the unique device ID of the RustDesk remote desktop application.",
+        "links": [
+          {
+            "type": "github",
+            "url": "https://github.com/abdullah-erturk/RustDesk-ID-Changer"
+          }
+        ]
+      },
+      {
+        "title": "RustDesk Silent Installation",
+        "icon": "fa-solid fa-volume-xmark",
+        "desc_tr": "RustDesk'i kullanıcıya herhangi bir bildirim göstermeden sessizce yükleyen otomasyon betiği.",
+        "desc_en": "An automation script that silently installs RustDesk without showing any notifications to the user.",
+        "links": [
+          {
+            "type": "github",
+            "url": "https://github.com/abdullah-erturk/RustDesk-Silent-Installation"
           }
         ]
       }

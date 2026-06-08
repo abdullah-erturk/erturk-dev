@@ -478,7 +478,7 @@ function addLinkRow(link = { type: 'github', url: '', text: '' }) {
       <option value="mega" ${link.type === 'mega' ? 'selected' : ''}>Mega</option>
     </select>
     <input type="text" class="link-url" placeholder="URL" value="${link.url}">
-    <input type="text" class="link-text" placeholder="Görünen Metin (Opsiyonel)" value="${link.text || ''}" style="display: ${link.type === 'mega' ? 'block' : 'none'}; width:100px;">
+    <input type="text" class="link-text" placeholder="Görünen Metin (Opsiyonel)" value="${link.text || ''}" style="display: ${link.type === 'github' ? 'none' : 'block'}; width:150px;">
     <button type="button" class="danger" style="padding:10px;" onclick="this.parentElement.remove()"><i class="fa-solid fa-xmark"></i></button>
   `;
   container.appendChild(div);
@@ -486,10 +486,10 @@ function addLinkRow(link = { type: 'github', url: '', text: '' }) {
 
 function toggleLinkText(selectEl) {
   const textInput = selectEl.parentElement.querySelector('.link-text');
-  if (selectEl.value === 'mega') {
-    textInput.style.display = 'block';
-  } else {
+  if (selectEl.value === 'github') {
     textInput.style.display = 'none';
+  } else {
+    textInput.style.display = 'block';
   }
 }
 
@@ -509,7 +509,7 @@ function saveCard() {
     const text = row.querySelector('.link-text').value;
     if (url.trim() !== '') {
       const l = { type, url };
-      if(type === 'mega' && text.trim() !== '') l.text = text;
+      if(type !== 'github' && text.trim() !== '') l.text = text;
       links.push(l);
     }
   });

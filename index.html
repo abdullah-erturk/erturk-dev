@@ -788,7 +788,7 @@ function applyLanguage(lang){
 	  if(el.classList.contains('mega-link')) return;
 	  el.innerHTML = `<i class="fa-brands fa-github"></i> ${t.githubLink}`;
 	});
-    document.querySelectorAll('.info-link').forEach(el => {
+    document.querySelectorAll('.info-link:not([data-custom])').forEach(el => {
       el.innerHTML = `<i class="fa-solid fa-circle-info"></i> ${t.infoLink}`;
     });
   document.querySelector('.player-title').textContent = t.playerTitle;
@@ -866,7 +866,9 @@ async function loadPortfolio() {
             } else if (link.type === 'mega') {
               html += `<a href="${link.url}" class="github-link mega-link" target="_blank"><i class="fa-solid fa-cloud-arrow-down"></i> ${link.text}</a>`;
             } else if (link.type === 'info') {
-              html += `<a href="${link.url}" class="info-link" target="_blank"><i class="fa-solid fa-circle-info"></i> Bilgi</a>`;
+              let text = link.text || 'Bilgi';
+              let customAttr = link.text ? 'data-custom="true"' : '';
+              html += `<a href="${link.url}" class="info-link" ${customAttr} target="_blank"><i class="fa-solid fa-circle-info"></i> ${esc(text)}</a>`;
             }
           });
           html += `</div>`;
