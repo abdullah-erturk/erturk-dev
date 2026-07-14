@@ -177,6 +177,18 @@
         ]
       },
       {
+        "title": "RDS Gen",
+        "icon": "fa-solid fa-server",
+        "desc_tr": "PowerShell ile oluşturulmuş Çevrimdışı Uzaktan Masaüstü Hizmetleri (RDS) Lisans Oluşturucu (SPK ve LKP).🔑",
+        "desc_en": "Offline Remote Desktop Services (RDS) License Generator (SPK & LKP) built with PowerShell.🔑",
+        "links": [
+          {
+            "type": "github",
+            "url": "https://github.com/abdullah-erturk/RDS-Gen"
+          }
+        ]
+      },
+      {
         "title": "Office 365 Enterprise Offline/Online Installer",
         "icon": "fa-brands fa-microsoft",
         "desc_tr": "Office 365 Enterprise kurulumunu hem çevrimiçi hem de çevrimdışı olarak kolaylaştıran betik tabanlı yükleyici.",
