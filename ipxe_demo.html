@@ -194,6 +194,7 @@
             <li><a href="#" onclick="loadCategory('ISO_WIN');closeSidebar()"><i class="fa-brands fa-windows"></i> <span data-i18n="nav_iso_win_mgmt">Windows ISO</span></a></li>
             <li><a href="#" onclick="loadCategory('ISO_LINUX');closeSidebar()"><i class="fa-brands fa-linux"></i> <span data-i18n="nav_iso_linux_mgmt">Linux ISO</span></a></li>
             <li><a href="#" onclick="loadCategory('WIM');closeSidebar()"><i class="fa-solid fa-hard-drive"></i> <span data-i18n="nav_wim_mgmt">WIM Yönetimi</span></a></li>
+                        <li><a href="#" onclick="showVnc();closeSidebar()" id="nav-vnc"><i class="fa-solid fa-desktop"></i> <span data-i18n="nav_vnc_clients">Canlı İstemciler</span></a></li>
             <li><a href="#" onclick="showDhcp();closeSidebar()" id="nav-dhcp"><i class="fa-solid fa-network-wired"></i> <span data-i18n="nav_dhcp_config">DHCP / Firewall Konfigürasyonu</span></a></li>
         </ul>
         <div class="sidebar-controls">
@@ -303,9 +304,28 @@
             </div>
             <style>.dhcp-grid { display: grid; grid-template-columns: 1fr 350px; gap: 30px; } @media (max-width: 1100px) { .dhcp-grid { grid-template-columns: 1fr; } }</style>
         </div>
+
+        <div id="section-vnc" style="display:none; padding: 0 20px;">
+            <h2 style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px; margin-top:20px;">
+                <span style="display:flex; align-items:center; gap:10px;">
+                    <i class="fa-solid fa-desktop" style="color:var(--primary);"></i> 
+                    <span data-i18n="vnc_panel_title">Canlı İstemciler (VNC)</span>
+                </span>
+                <span id="vncCountBadge" style="background:rgba(20,184,166,0.15); color:var(--primary); padding:4px 12px; border-radius:20px; font-size:13px; font-weight:700;">0 İstemci</span>
+            </h2>
+            <div style="background: rgba(59,130,246,0.1); padding: 15px; border-radius: 12px; margin-bottom: 20px; display: flex; align-items: center; gap: 12px; color: #3b82f6; font-size: 14px;">
+                <i class="fa-solid fa-circle-info"></i>
+                <span data-i18n="vnc_info_desc">Bu panel sadece simülasyondur. Gerçek projede WinPE cihazları boot ettiğinde otomatik olarak burada belirir ve 'Bağlan' butonuna tıklayarak tarayıcı üzerinden noVNC ile uzaktan yönetim sağlayabilirsiniz.</span>
+            </div>
+            
+            <div id="vncClientsContainer" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;">
+                <!-- Dinamik istemciler buraya gelecek -->
+            </div>
+        </div>
+
         <footer class="footer">
-            <div>made by <b><a href="https://buymeacoffee.com/abdullaherturk" target="_blank" style="color:inherit; text-decoration:none;">Abdullah ERTÜRK</a></b></div>
-            <div><a href="https://github.com/abdullah-erturk" target="_blank">github.com/abdullah.erturk</a> | <a href="https://erturk-dev.netlify.app" target="_blank">erturk-dev.netlify.app</a></div>
+            made by Abdullah ERTÜRK<br>
+            <a href="https://github.com/abdullah-erturk" target="_blank">github.com/abdullah-erturk</a> | <a href="https://erturk-dev.netlify.app" target="_blank">erturk-dev.netlify.app</a>
         </footer>
     </main>
 
@@ -1059,8 +1079,31 @@
                 document.querySelectorAll('[data-i18n-placeholder]').forEach(el => { const k = el.getAttribute('data-i18n-placeholder'); if(translations[k]) el.placeholder = translations[k].replace(/\\n/g, '\n'); });
                 if (currentView === 'dhcp') {
                     showDhcp();
+                } else if (currentView === 'vnc') {
+                    simulateVncClients(); 
                 } else {
                     loadCategory(currentCategory);
+                }
+                
+                // Manuel Fallback for VNC (Eger iniden okuyamazsa)
+                if(selectedLang === 'English') {
+                    const vncTitle = document.querySelector('[data-i18n="vnc_panel_title"]');
+                    if (vncTitle && vncTitle.innerText.includes('İstemci')) vncTitle.innerText = 'Live Clients (VNC)';
+                    
+                    const vncDesc = document.querySelector('[data-i18n="vnc_info_desc"]');
+                    if (vncDesc && vncDesc.innerText.includes('simülasyon')) vncDesc.innerText = "This panel is just a simulation. In the real project, when WinPE devices boot, they automatically appear here, and you can remotely manage them via noVNC in your browser by clicking the 'Connect' button.";
+                    
+                    const navVnc = document.querySelector('[data-i18n="nav_vnc_clients"]');
+                    if (navVnc && navVnc.innerText.includes('İstemci')) navVnc.innerText = 'Live Clients';
+                } else {
+                    const vncTitle = document.querySelector('[data-i18n="vnc_panel_title"]');
+                    if (vncTitle) vncTitle.innerText = 'Canlı İstemciler (VNC)';
+                    
+                    const vncDesc = document.querySelector('[data-i18n="vnc_info_desc"]');
+                    if (vncDesc) vncDesc.innerText = "Bu panel sadece simülasyondur. Gerçek projede WinPE cihazları boot ettiğinde otomatik olarak burada belirir ve 'Bağlan' butonuna tıklayarak tarayıcı üzerinden noVNC ile uzaktan yönetim sağlayabilirsiniz.";
+                    
+                    const navVnc = document.querySelector('[data-i18n="nav_vnc_clients"]');
+                    if (navVnc) navVnc.innerText = 'Canlı İstemciler';
                 }
             } catch(e) { 
                 console.warn("API/Local mode: Dil yüklenemedi", e.message); 
@@ -1121,6 +1164,7 @@
 
             document.querySelector('.stats-grid').style.display = 'grid';
             document.getElementById('section-dhcp').style.display = 'none';
+            if (document.getElementById('section-vnc')) document.getElementById('section-vnc').style.display = 'none';
             
             if (document.getElementById('bootSettingsCard')) {
                 document.getElementById('bootSettingsCard').style.display = (cat === 'ALL' ? 'block' : 'none');
@@ -1168,6 +1212,74 @@
             fetchFiles();
         }
 
+        
+        function showVnc() {
+            currentView = 'vnc';
+            document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+            document.getElementById('nav-vnc').classList.add('active');
+
+            document.querySelector('.stats-grid').style.display = 'none';
+            if (document.getElementById('bootSettingsCard')) document.getElementById('bootSettingsCard').style.display = 'none';
+            const mainCard = document.getElementById('mainTableCard');
+            if (mainCard) mainCard.style.display = 'none';
+            document.getElementById('section-dhcp').style.display = 'none';
+            if (document.getElementById('section-vnc')) document.getElementById('section-vnc').style.display = 'none';
+            
+            document.getElementById('section-vnc').style.display = 'block';
+            simulateVncClients();
+        }
+
+        const MOCK_IPS = ['10.50.1.72', '192.168.1.105', '172.16.0.45'];
+        let activeVncClients = [];
+        
+        function simulateVncClients() {
+            if (currentView !== 'vnc') return;
+            const count = Math.floor(Math.random() * 2) + 1;
+            activeVncClients = MOCK_IPS.slice(0, count).map(ip => ({
+                ip: ip,
+                port: 5900,
+                connected_at: new Date().toLocaleTimeString()
+            }));
+            renderVnc();
+        }
+
+        function renderVnc() {
+            const container = document.getElementById('vncClientsContainer');
+            const badge = document.getElementById('vncCountBadge');
+            
+            if (activeVncClients.length === 0) {
+                badge.innerText = '0 İstemci';
+                container.style.display = 'block';
+                container.innerHTML = '<div style="text-align:center; padding:40px; color:var(--text-dim);"><i class="fa-solid fa-network-wired" style="font-size:32px; opacity:0.3; margin-bottom:15px;"></i><br><span data-i18n="msg_no_connections">Aktif WinPE (VNC) istemcisi bulunamadı.</span><br><small style="opacity:0.7">Ağ taranıyor...</small></div>';
+                if(translations['msg_no_connections']) {
+                   document.querySelector('[data-i18n="msg_no_connections"]').innerText = translations['msg_no_connections'];
+                }
+                return;
+            }
+
+            badge.innerText = activeVncClients.length + ' İstemci';
+            container.style.display = 'grid';
+            
+            container.innerHTML = activeVncClients.map(client => `
+                <div style="background: var(--card-bg, #1e293b); border: 1px solid var(--border); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 15px;">
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(20,184,166,0.1); display: flex; align-items: center; justify-content: center; position: relative;">
+                            <i class="fa-solid fa-laptop" style="color: var(--primary); font-size: 20px;"></i>
+                            <div style="position: absolute; bottom: -2px; right: -2px; width: 14px; height: 14px; background: #22c55e; border-radius: 50%; border: 3px solid var(--card-bg, #1e293b);"></div>
+                        </div>
+                        <div>
+                            <div style="font-size: 15px; font-weight: 700; color: var(--text);">${translations['vnc_client_name'] ? translations['vnc_client_name'] : (selectedLang === 'English' ? 'WinPE Client' : 'WinPE İstemci')}</div>
+                            <div style="font-size: 12px; color: var(--text-dim); margin-top: 4px;"><i class="fa-solid fa-wifi" style="font-size:10px; margin-right:4px;"></i> ${client.ip} | Port: ${client.port}</div>
+                            <div style="font-size: 12px; color: var(--text-dim); margin-top: 2px;"> ${client.connected_at}</div>
+                        </div>
+                    </div>
+                    <button onclick="alert(localStorage.getItem('pxe_lang') === 'English' ? 'Remote connection cannot be simulated in the demo version. In the real version, clicking this button opens a noVNC tab in the browser.' : 'Demo sürümünde uzaktan bağlantı simüle edilemez. Gerçek sürümde bu butona basınca tarayıcı üzerinde noVNC sekmesi açılır.')" style="width: 100%; padding: 12px; border-radius: 10px; background: rgba(20,184,166,0.15); color: var(--primary); border: 1px solid rgba(20,184,166,0.3); font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s;">
+                        <i class="fa-solid fa-play"></i> ${translations['vnc_connect_btn'] ? translations['vnc_connect_btn'] : (selectedLang === 'English' ? 'Connect' : 'Bağlan')}
+                    </button>
+                </div>
+            `).join('');
+        }
+
         function showDhcp() {
             currentView = 'dhcp';
             document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
@@ -1179,6 +1291,7 @@
             const mainCard = document.getElementById('mainTableCard');
             if (mainCard) mainCard.style.display = 'none';
 
+            if(document.getElementById('section-vnc')) document.getElementById('section-vnc').style.display = 'none';
             document.getElementById('section-dhcp').style.display = 'block';
             
             document.getElementById('dhcpConfigIP').value = document.getElementById('serverIP').value || '192.168.1.1';
