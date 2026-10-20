@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Acronis True Image 2026 Launcher - ReadMe</title>
+    <title>Acronis True Image 2026 Launcher x64 - ReadMe</title>
     <style>
         :root {
             --primary: #14b8a6;
@@ -31,6 +31,7 @@
             position: relative;
         }
 
+        /* Buzlu cam efektini patlatacak dekoratif parlama alanları */
         body::before,
         body::after {
             content: "";
@@ -57,7 +58,7 @@
         }
 
         .container {
-            max-width: 1100px;
+            max-width: 1400px;
             margin: 0 auto;
             padding: 40px 20px;
         }
@@ -225,13 +226,235 @@
             font-size: 0.9em;
             border: 1px solid rgba(255, 95, 95, 0.2);
         }
+
+        .tree {
+            margin-top: 30px;
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 20px;
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+        }
+
+        .tree h2 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 18px;
+            color: var(--primary);
+            font-size: 1.35rem;
+        }
+
+        .tree pre {
+            font-family: 'Consolas', monospace;
+            font-size: 0.85rem;
+            line-height: 1.7;
+            color: var(--text);
+            background: rgba(0, 0, 0, 0.25);
+            padding: 18px 20px;
+            border-radius: 12px;
+            overflow-x: auto;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .tree pre .dim {
+            color: var(--text-dim);
+        }
+
+        .tree pre .opt {
+            color: var(--primary);
+        }
+
+        .steps-wrap {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .steps-wrap {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .steps-col h3 {
+            font-size: 1rem;
+            color: var(--primary);
+            margin-bottom: 14px;
+            letter-spacing: 0.5px;
+        }
+
+        ol.steps {
+            list-style: none;
+            counter-reset: step;
+        }
+
+        ol.steps li {
+            counter-increment: step;
+            position: relative;
+            padding-left: 42px;
+            margin-bottom: 14px;
+            color: var(--text-dim);
+            font-size: 0.95rem;
+        }
+
+        ol.steps li::before {
+            content: counter(step);
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(20, 184, 166, 0.15);
+            border: 1px solid rgba(20, 184, 166, 0.35);
+            color: var(--primary);
+            border-radius: 50%;
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+
+        ol.steps li strong {
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        .ftree {
+            --line: rgba(148, 163, 184, 0.55);
+            display: grid;
+            grid-template-columns: max-content 1fr;
+            column-gap: 32px;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            background: rgba(0, 0, 0, 0.25);
+            padding: 18px 22px 8px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .ftree .fn {
+            position: relative;
+            font-family: 'Consolas', monospace;
+            color: var(--text);
+            white-space: nowrap;
+            padding-bottom: 14px;
+        }
+
+        .ftree .fd {
+            color: var(--text-dim);
+            padding-bottom: 14px;
+        }
+
+        .ftree .fd.opt {
+            color: var(--primary);
+        }
+
+        .ftree .fd span {
+            display: inline-block;
+            width: 26px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            opacity: 0.6;
+        }
+
+        /* Kok satir: cizgi hemen altindan baslasin */
+        .ftree .fn.root,
+        .ftree .fn.root+.fd {
+            padding-bottom: 0;
+        }
+
+        /* Alt klasoru olan satir: cocuk cizgisi metnin hemen altindan baslasin */
+        .ftree .d0.kids {
+            background: linear-gradient(var(--line), var(--line)) no-repeat 32px 1.5em / 1px calc(100% - 1.5em);
+        }
+
+        .ftree .d0 {
+            padding-left: 28px;
+        }
+
+        .ftree .d1 {
+            padding-left: 54px;
+        }
+
+        /* Birinci seviye dal: dikey + yatay cizgi */
+        .ftree .d0::before,
+        .ftree .d1::before {
+            content: "";
+            position: absolute;
+            left: 6px;
+            top: 0;
+            bottom: 0;
+            border-left: 1px solid var(--line);
+        }
+
+        .ftree .d0.last::before {
+            bottom: auto;
+            height: 0.75em;
+        }
+
+        .ftree .d0::after {
+            content: "";
+            position: absolute;
+            left: 6px;
+            top: 0.75em;
+            width: 16px;
+            border-top: 1px solid var(--line);
+        }
+
+        /* Ikinci seviye dal */
+        .ftree .d1 b {
+            position: absolute;
+            inset: 0;
+        }
+
+        .ftree .d1 b::before {
+            content: "";
+            position: absolute;
+            left: 32px;
+            top: 0;
+            bottom: 0;
+            border-left: 1px solid var(--line);
+        }
+
+        .ftree .d1.last b::before {
+            bottom: auto;
+            height: 0.75em;
+        }
+
+        .ftree .d1 b::after {
+            content: "";
+            position: absolute;
+            left: 32px;
+            top: 0.75em;
+            width: 16px;
+            border-top: 1px solid var(--line);
+        }
+
+        @media (max-width: 768px) {
+            .ftree {
+                grid-template-columns: 1fr;
+            }
+
+            .ftree .fn {
+                padding-bottom: 2px;
+            }
+
+            .ftree .fd {
+                padding-left: 28px;
+            }
+        }
     </style>
 </head>
 
 <body>
     <div class="container">
         <header>
-            <h1>Acronis True Image 2026 Portable Launcher v2 (fixed)</h1>
+            <h1>Acronis True Image 2026 Portable Launcher v3 x64</h1>
             <p class="subtitle">WinPE & Windows</p>
             <div
                 style="margin-top: 5px; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 30px;">
@@ -239,7 +462,8 @@
                     <strong>Abdullah ERTÜRK</strong></p>
                 <a href="https://github.com/abdullah-erturk" class="btn" style="margin-top: 0;"
                     target="_blank">GitHub</a>
-                <a href="https://mega.nz/folder/tUhznB6T#s9yjwua2YIjf5YhhTKMwIg" class="btn" style="margin-top: 0;" target="_blank">Download Link</a>
+                <a href="https://mega.nz/folder/tUhznB6T#s9yjwua2YIjf5YhhTKMwIg" class="btn" style="margin-top: 0;"
+                    target="_blank">Download Link</a>
                 <a href="https://erturk-dev.netlify.app" class="btn" style="margin-top: 0;" target="_blank">Website</a>
             </div>
         </header>
@@ -249,15 +473,16 @@
             <div class="card">
                 <h2>Türkçe Sürüm Notları</h2>
                 <ul>
-                    <li><strong>Hibrit Sistem Desteği:</strong> WinPE ve Canlı Windows ortamlarını otomatik tespit eder, sorunsuz geçiş yapar.</li>
-                    <li><strong>Bağımsız Çalışma:</strong> WinPE ortamında <code>sc.exe</code> veya <code>powershell</code> gerektirmez, registry üzerinden çalışır.</li>
-                    <li><strong>Dahili Aktivasyon:</strong> Lisans verileri <code>Acronis Launcher.exe</code> dosyasına gömülüdür, tam sürüm olarak açılır.</li>
-                    <li><strong>Filtre Yönetimi:</strong> Sürücü filtrelerini (snapman, fltsrv) sistem stabilitesini bozmadan anında enjekte eder.</li>
-                    <li><strong>Akıllı Temizlik:</strong> Kapanışta tüm izleri otomatik siler.</li>
-                    <li><strong>Çalıştırma İşlemi:</strong> Uygulama mutlaka <code>Acronis Launcher.exe</code> dosyası üzerinden çalıştırılmalıdır.</li>
+                    <li><strong>Harici Acronis klasörü (YENİ):</strong> Sürücü ve program dosyaları artık exe'ye gömülü değildir. Exe'nin yanındaki <code>Acronis\</code> klasöründen okunur — gömülü sürüme göre küçük exe ve kolay güncelleme.</li>
+                    <li><strong>Dinamik sürücü yükleme (YENİ):</strong> Sabit <code>snapman/fltsrv</code> isimleri yerine <code>Acronis\Drivers\</code> içindeki tüm <code>*.sys</code> dosyalarını otomatik tarar ve yükler.</li>
+                    <li><strong>Live Windows güvenliği (YENİ):</strong> Sistemde <strong>kurulu bir Acronis</strong> varsa işlem iptal edilir; ayrıca sürücü Class anahtarları yedeklenip çıkışta geri yüklenir.</li>
+                    <li><strong>Hibrit tespit:</strong> WinPE ve Normal Windows'u otomatik ayırt eder; WinPE'de sürücüler zaten yüklüyse onlara dokunmaz.</li>
+                    <li><strong>Bağımsız çalışma:</strong> WinPE'de <code>sc.exe</code> / <code>powershell</code> olmadan doğrudan registry ile çalışır (<code>sc.exe</code> yalnızca saf WinPE'de opsiyonel yedektir).</li>
+                    <li><strong>Dahili aktivasyon:</strong> Lisans koşulsuz olarak tüm yollara yazılır, tam sürüm açılır (sürüm tespiti kaldırıldı).</li>
                 </ul>
                 <div class="badges">
-                    <span class="badge">WinPE Desteği</span>
+                    <span class="badge">WinPE / Windows Desteği</span>
+                    <span class="badge">Drop-in</span>
                     <span class="badge">Tam Sürüm</span>
                     <span class="badge">Taşınabilir</span>
                 </div>
@@ -267,25 +492,99 @@
             <div class="card">
                 <h2>English Release Notes</h2>
                 <ul>
-                    <li><strong>Hybrid Support:</strong> Automatically detects WinPE and Live Windows environments for seamless execution.</li>
-                    <li><strong>Zero Dependencies:</strong> Functions without <code>sc.exe</code> or <code>powershell</code> in WinPE mode using direct registry logic.</li>
-                    <li><strong>Internal Activation:</strong> The license data is embedded in the <code>Acronis Launcher.exe</code> file; it opens as the full version.</li>
-                    <li><strong>Filter Management:</strong> Instantly injects driver filters (snapman, fltsrv) without compromising system stability.</li>
-                    <li><strong>Smart Cleanup:</strong> Removes all traces upon application exit.</li>
-                    <li><strong>Operation process:</strong> The application must be launched via the specifically created <code>Acronis Launcher.exe</code> file.</li>
+                    <li><strong>External Acronis folder (NEW):</strong> Driver and program files are no longer embedded in the exe. They are read from the <code>Acronis\</code> folder next to the exe — a small launcher and easy updates.</li>
+                    <li><strong>Dynamic driver loading (NEW):</strong> Instead of hardcoded <code>snapman/fltsrv</code>, it auto-scans and loads every <code>*.sys</code> in <code>Acronis\Drivers\</code>.</li>
+                    <li><strong>Live Windows safety (NEW):</strong> Aborts if an <strong>installed Acronis</strong> is detected; it also backs up the driver Class keys and restores them on exit.</li>
+                    <li><strong>Hybrid detection:</strong> Auto-detects WinPE vs Live Windows; in WinPE it leaves already-loaded drivers untouched.</li>
+                    <li><strong>Zero dependencies:</strong> Works via direct registry in WinPE without <code>sc.exe</code> / <code>powershell</code> (<code>sc.exe</code> is only an optional fallback on pure WinPE).</li>
+                    <li><strong>Internal activation:</strong> The license is written unconditionally to all paths and opens as full version (version detection removed).</li>
                 </ul>
                 <div class="badges">
-                    <span class="badge">WinPE Support</span>
+                    <span class="badge">WinPE / Windows Support</span>
+                    <span class="badge">Drop-in</span>
                     <span class="badge">Full Version</span>
                     <span class="badge">Portable</span>
                 </div>
             </div>
         </div>
 
-        <div class="tech-info">
-            <p><b>Teknik Not:</b> Bu başlatıcı; hem saf (stock) hem de modifiye edilmiş tüm WinPE (Sergei, Anhdv, BlueCon, ActiveData vb.) ve Windows sürümleriyle tam uyumludur. Sürücü yükleme hatalarını (0x100005) gidermek için özel HEX enjeksiyon yöntemleri kullanır. <b>Online Windows ortamında geri yükleme yapılamaz, bu işlem için WinPE gereklidir.</b></p>
-            <p style="margin-top: 5px;"><b>Technical Note:</b> This launcher is fully compatible with all Windows versions and WinPE environments (Sergei, Anhdv, BlueCon, ActiveData etc.). It utilizes specialized HEX injection methods to resolve driver loading errors (0x100005). <b>Restoration cannot be performed in an Online Windows environment; WinPE is required for this process.</b></p>
+        <div class="tree">
+            <h2>Kurulum & Klasör Düzeni / Setup & Folder Layout</h2>
+            <div class="steps-wrap">
+                <div class="steps-col">
+                    <h3>TÜRKÇE — ADIMLAR</h3>
+                    <ol class="steps">
+                        <li><code>AcronisTrueImage.msi</code> içinden <strong>veya</strong> <code>C:\Program Files\Acronis\TrueImageHome\WinPE</code> içinden <code>winpe_resources.dll → WinPE.zip</code> açılarak içindeki <code>Files64</code> <strong>klasörü</strong> çıkarılır. <em>MSI dosyası için <strong>3. parti bir ayıklama uygulaması</strong> gerekir (7-Zip MSI'yi ayıklayamaz); DLL ve ZIP için <strong>7-Zip</strong> kullanılabilir.</em></li>
+                        <li><code>Files64</code> klasörü <strong>Acronis</strong> olarak yeniden adlandırılır.</li>
+                        <li>Exe bu klasörün <strong>yanına</strong> konup çalıştırılır.</li>
+                    </ol>
+                    <p style="color: var(--text-dim); font-size: 0.85rem; margin-top: 4px;">Başka dosya taşıma/yeniden adlandırma gerekmez.</p>
+                </div>
+                <div class="steps-col">
+                    <h3>ENGLISH — STEPS</h3>
+                    <ol class="steps">
+                        <li>Open <code>winpe_resources.dll → WinPE.zip</code> and extract the <code>Files64</code> <strong>folder</strong> from <code>AcronisTrueImage.msi</code> <strong>or</strong> from <code>C:\Program Files\Acronis\TrueImageHome\WinPE</code>. <em>The MSI file requires a <strong>3rd-party extraction tool</strong> (7-Zip cannot extract MSI); <strong>7-Zip</strong> can be used for the DLL and ZIP.</em></li>
+                        <li>Rename the <code>Files64</code> folder to <strong>Acronis</strong>.</li>
+                        <li>Place the exe <strong>next to</strong> that folder and run it.</li>
+                    </ol>
+                    <p style="color: var(--text-dim); font-size: 0.85rem; margin-top: 4px;">No other file moving/renaming is needed.</p>
+                </div>
+            </div>
+            <div class="ftree">
+                <div class="fn root">&lt;klasör / folder&gt;\</div><div class="fd"></div>
+                <div class="fn d0">Acronis_Launcher.exe</div><div class="fd "><span>TR</span>Başlatıcı<br><span>EN</span>Launcher</div>
+                <div class="fn d0 kids">Acronis\</div><div class="fd "><span>TR</span>Yeniden adlandırılmış Files64<br><span>EN</span>Renamed Files64</div>
+                <div class="fn d1"><b></b>TrueImage.exe</div><div class="fd "><span>TR</span>+ Program dosyaları<br><span>EN</span>+ Program files</div>
+                <div class="fn d1 last"><b></b>Drivers\</div><div class="fd "><span>TR</span>*.sys sürücüler + DLL + VC++ runtime<br><span>EN</span>*.sys drivers + DLLs + VC++ runtime</div>
+                <div class="fn d0">sc.exe</div><div class="fd opt"><span>TR</span>OPSİYONEL — saf WinPE'de legacy sürücüler için fallback<br><span>EN</span>OPTIONAL — fallback for legacy drivers on pure WinPE</div>
+                <div class="fn d0 last">smb_creds.reg</div><div class="fd opt"><span>TR</span>OPSİYONEL — önceden export edilmiş ağ paylaşımı kimlik bilgisi (aşağıya bakın)<br><span>EN</span>OPTIONAL — pre-exported network share credentials (see below)</div>
+            </div>
         </div>
+
+        <div class="tree">
+            <h2>Ağ Paylaşımı Kimlik Bilgisi (opsiyonel) / Network Share Credentials (optional)</h2>
+            <div class="steps-wrap">
+                <div class="steps-col">
+                    <h3>TÜRKÇE</h3>
+                    <p style="color: var(--text-dim); font-size: 0.95rem; margin-bottom: 12px;">SMB/NAS paylaşımına bağlanmak için Acronis'te kayıtlı kimlik bilgileri, Acronis'in çalıştığı ortamda <strong>önceden export edilmeli</strong> ve <code>smb_creds.reg</code> adıyla <strong>exe'nin yanına</strong> konmalıdır. Launcher, varsa bu dosyayı açılışta otomatik içe aktarır.</p>
+                    <p style="color: var(--text-dim); font-size: 0.95rem;">Export edilecek anahtarlar (<code>&lt;IP&gt;</code> = paylaşım sunucusunun adresi):</p>
+                </div>
+                <div class="steps-col">
+                    <h3>ENGLISH</h3>
+                    <p style="color: var(--text-dim); font-size: 0.95rem; margin-bottom: 12px;">The credentials Acronis has saved for connecting to an SMB/NAS share must be <strong>exported beforehand</strong> and placed <strong>next to the exe</strong> as <code>smb_creds.reg</code>. The launcher imports this file automatically at startup if it exists.</p>
+                    <p style="color: var(--text-dim); font-size: 0.95rem;">Keys to export (<code>&lt;IP&gt;</code> = address of the share server):</p>
+                </div>
+            </div>
+            <pre>HKEY_CURRENT_USER\Software\Acronis\Connections\SMB\<span class="opt">&lt;IP&gt;</span>
+HKEY_USERS\.DEFAULT\Software\Acronis\Connections\SMB\<span class="opt">&lt;IP&gt;</span></pre>
+            <p style="color: var(--text-dim); font-size: 0.95rem; margin: 18px 0 10px;">
+                <b>TR:</b> Aşağıdaki batch dosyası (örn. <code>export_smb_creds.cmd</code>) iki anahtarı tek bir <code>smb_creds.reg</code> dosyasında birleştirip kendi bulunduğu klasöre kaydeder. <strong>Yönetici olarak</strong> çalıştırın; kayıtlı tüm SMB sunucuları export edilir.<br>
+                <b>EN:</b> The batch file below (e.g. <code>export_smb_creds.cmd</code>) merges both keys into a single <code>smb_creds.reg</code> saved next to the script. Run it <strong>as administrator</strong>; all saved SMB servers are exported.
+            </p>
+            <pre>@echo off
+set "OUT=%~dp0smb_creds.reg"
+
+reg export "HKCU\Software\Acronis\Connections\SMB" "%TEMP%\smb_hkcu.reg" /y
+reg export "HKU\.DEFAULT\Software\Acronis\Connections\SMB" "%TEMP%\smb_hku.reg" /y
+
+powershell -NoProfile -Command "$a=Get-Content '%TEMP%\smb_hkcu.reg' -Encoding Unicode; $b=Get-Content '%TEMP%\smb_hku.reg' -Encoding Unicode | Select-Object -Skip 1; ($a+$b) | Set-Content '%OUT%' -Encoding Unicode"
+
+del "%TEMP%\smb_hkcu.reg" "%TEMP%\smb_hku.reg"
+echo Done: %OUT%
+pause</pre>
+            <p style="color: var(--text-dim); font-size: 0.85rem; margin-top: 14px;"><b>TR:</b> <code>smb_creds.reg</code> dosyası şifre bilgisi içerir; başkalarıyla paylaşmayın. &nbsp;·&nbsp; <b>EN:</b> <code>smb_creds.reg</code> contains password data; do not share it.</p>
+        </div>
+
+        <div class="tech-info">
+            <p><b>Uyumluluk:</b> Acronis True Image <b>2026</b> ile test edilmiştir. Eski sürümler (2025 ve öncesi) test edilmemiştir.</p>
+            <p style="margin-top: 5px;"><b>Compatibility:</b> Tested with Acronis True Image <b>2026</b>. Older versions (2025 and earlier) have not been tested.</p>
+            <p style="margin-top: 15px;"><b>VirusTotal:</b> <a href="https://www.virustotal.com/gui/file/2f7084b180daae977e0886723faefbb7ae566e83961e9742c3308ac6f6c96820" target="_blank" style="color: var(--primary);">Tarama raporu / Scan report</a> · Rapor tarihi / Report date: <b>20.10.2026</b></p>
+            <p style="margin-top: 15px;"><b>Gelecek Sürümler:</b> Sürüm tespiti yapılmadığı ve sürücüler <code>Drivers\</code> klasöründen dinamik yüklendiği için, bu başlatıcının Acronis'in sonraki sürümlerinde de çalışma ihtimali yüksektir (klasör yapısı aynı kaldığı sürece).</p>
+            <p style="margin-top: 5px;"><b>Future Versions:</b> Since there is no version detection and drivers are loaded dynamically from the <code>Drivers\</code> folder, this launcher is very likely to work with future Acronis versions as well (as long as the folder structure stays the same).</p>
+            <p style="margin-top: 15px;"><b>Teknik Not:</b> Bu başlatıcı; hem saf (stock) hem de modifiye edilmiş tüm WinPE (Sergei, Anhdv, BlueCon, ActiveData vb.) ve Windows sürümleriyle tam uyumludur. <code>UpperFilters</code> değerini doğru <code>REG_MULTI_SZ</code> tipiyle (reg import) yazarak sürücü yükleme hatalarını (0x100005) giderir. Önceki sürümdeki gömülü dosyalar, sürüm-özel lisans blokları ve kök sertifika kurulumu kaldırılmıştır. <b>Online Windows ortamında geri yükleme yapılamaz, bu işlem için WinPE gereklidir.</b></p>
+            <p style="margin-top: 5px;"><b>Technical Note:</b> This launcher is fully compatible with all Windows versions and WinPE environments (Sergei, Anhdv, BlueCon, ActiveData etc.). It writes <code>UpperFilters</code> with the correct <code>REG_MULTI_SZ</code> type (via reg import) to resolve driver loading errors (0x100005). The previous version's embedded files, per-version license blocks and root-certificate install have been removed. <b>Restoration cannot be performed in an Online Windows environment; WinPE is required for this process.</b></p>
+        </div>
+
     </div>
 </body>
 
