@@ -86,7 +86,7 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 30px;
-            margin-bottom: 5px;
+            margin-bottom: 30px;
         }
 
         @media (max-width: 768px) {
@@ -115,17 +115,20 @@
             border-color: var(--primary);
         }
 
-        .card h2 {
+        .card h2, .card h3 {
             display: flex;
             align-items: center;
             gap: 10px;
             margin-bottom: 20px;
             color: var(--primary);
+        }
+
+        .card h2 {
             font-size: 1.5rem;
         }
 
-        .card h2 span {
-            font-size: 1.2rem;
+        .card h3 {
+            font-size: 1.35rem;
         }
 
         ul {
@@ -136,6 +139,7 @@
             margin-bottom: 15px;
             padding-left: 20px;
             position: relative;
+            text-align: justify;
         }
 
         li::before {
@@ -213,6 +217,10 @@
             box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
         }
 
+        .tech-info p {
+            text-align: justify;
+        }
+
         .tech-info b {
             color: var(--text);
         }
@@ -287,6 +295,10 @@
             letter-spacing: 0.5px;
         }
 
+        .steps-col p {
+            text-align: justify;
+        }
+
         ol.steps {
             list-style: none;
             counter-reset: step;
@@ -299,6 +311,7 @@
             margin-bottom: 14px;
             color: var(--text-dim);
             font-size: 0.95rem;
+            text-align: justify;
         }
 
         ol.steps li::before {
@@ -362,13 +375,11 @@
             opacity: 0.6;
         }
 
-        /* Kok satir: cizgi hemen altindan baslasin */
         .ftree .fn.root,
         .ftree .fn.root+.fd {
             padding-bottom: 0;
         }
 
-        /* Alt klasoru olan satir: cocuk cizgisi metnin hemen altindan baslasin */
         .ftree .d0.kids {
             background: linear-gradient(var(--line), var(--line)) no-repeat 32px 1.5em / 1px calc(100% - 1.5em);
         }
@@ -381,7 +392,6 @@
             padding-left: 54px;
         }
 
-        /* Birinci seviye dal: dikey + yatay cizgi */
         .ftree .d0::before,
         .ftree .d1::before {
             content: "";
@@ -406,7 +416,6 @@
             border-top: 1px solid var(--line);
         }
 
-        /* Ikinci seviye dal */
         .ftree .d1 b {
             position: absolute;
             inset: 0;
@@ -435,6 +444,10 @@
             border-top: 1px solid var(--line);
         }
 
+        .card p {
+            text-align: justify;
+        }
+
         @media (max-width: 768px) {
             .ftree {
                 grid-template-columns: 1fr;
@@ -454,11 +467,11 @@
 <body>
     <div class="container">
         <header>
-            <h1>Acronis True Image 2026 Portable Launcher v3 x64</h1>
+            <h1>Acronis True Image 2026 Launcher v4 x64</h1>
             <p class="subtitle">WinPE & Windows</p>
             <div
                 style="margin-top: 5px; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 30px;">
-                <p style="width: 100%; margin-bottom: 5px; font-size: 0.9rem; color: var(--text-dim);">Made with ❤️ by
+                <p style="width: 100%; margin-bottom: 5px; font-size: 0.9rem; color: var(--text-dim); text-align: center;">Made with ❤️ by
                     <strong>Abdullah ERTÜRK</strong></p>
                 <a href="https://github.com/abdullah-erturk" class="btn" style="margin-top: 0;"
                     target="_blank">GitHub</a>
@@ -475,10 +488,13 @@
                 <ul>
                     <li><strong>Harici Acronis klasörü (YENİ):</strong> Sürücü ve program dosyaları artık exe'ye gömülü değildir. Exe'nin yanındaki <code>Acronis\</code> klasöründen okunur — gömülü sürüme göre küçük exe ve kolay güncelleme.</li>
                     <li><strong>Dinamik sürücü yükleme (YENİ):</strong> Sabit <code>snapman/fltsrv</code> isimleri yerine <code>Acronis\Drivers\</code> içindeki tüm <code>*.sys</code> dosyalarını otomatik tarar ve yükler.</li>
+                    <li><strong>Otomatik Defender Yönetimi (YENİ):</strong> Executable dosyanın kendisi statik taramada Windows Defender tarafından tamamen temiz görünmektedir. Ancak çalıştırıldığı anda başlatıcının alt seviye disk imajı alabilmek için gerçekleştirdiği dinamik sürücü/servis kopyalama ve yükleme işlemleri (<code>fltmc load</code>) Defender'ın sezgisel tarayıcısı tarafından şüpheli/zararlı olarak algılanmakta ve engellenmektedir. Bu engeli aşarak uygulamanın sorunsuz çalışmasını sağlamak amacıyla başlatıcı, çalışma süresince kendisini (dinamik exe adını) anlık olarak Defender dışlamalarına ekler, çıkışta ise bu dışlamayı otomatik temizler.</li>
                     <li><strong>Live Windows güvenliği (YENİ):</strong> Sistemde <strong>kurulu bir Acronis</strong> varsa işlem iptal edilir; ayrıca sürücü Class anahtarları yedeklenip çıkışta geri yüklenir.</li>
                     <li><strong>Hibrit tespit:</strong> WinPE ve Normal Windows'u otomatik ayırt eder; WinPE'de sürücüler zaten yüklüyse onlara dokunmaz.</li>
                     <li><strong>Bağımsız çalışma:</strong> WinPE'de <code>sc.exe</code> / <code>powershell</code> olmadan doğrudan registry ile çalışır (<code>sc.exe</code> yalnızca saf WinPE'de opsiyonel yedektir).</li>
                     <li><strong>Dahili aktivasyon:</strong> Lisans koşulsuz olarak tüm yollara yazılır, tam sürüm açılır (sürüm tespiti kaldırıldı).</li>
+                    <li><strong>Windows 10 düzeltmesi (YENİ):</strong> Live Windows 10'da görülen <code>0x100005</code> "snapshot manager" hatası giderildi. <code>sc.exe</code> artık her zaman <code>System32</code>'den çağrılır, servis oluşturma başarısız olursa doğrudan registry'ye yazılır.</li>
+                    <li><strong>Hata ayıklama modu (YENİ):</strong> <code>Acronis_Launcher.exe /debug</code> ile çalıştırılırsa exe'nin yanına <code>acronis_launcher_log.txt</code> yazılır (ortam bilgisi, her komutun çıkış kodu ve çıktısı).</li>
                 </ul>
                 <div class="badges">
                     <span class="badge">WinPE / Windows Desteği</span>
@@ -494,10 +510,13 @@
                 <ul>
                     <li><strong>External Acronis folder (NEW):</strong> Driver and program files are no longer embedded in the exe. They are read from the <code>Acronis\</code> folder next to the exe — a small launcher and easy updates.</li>
                     <li><strong>Dynamic driver loading (NEW):</strong> Instead of hardcoded <code>snapman/fltsrv</code>, it auto-scans and loads every <code>*.sys</code> in <code>Acronis\Drivers\</code>.</li>
+                    <li><strong>Automatic Defender Management (NEW):</strong> The executable file itself appears completely clean to Windows Defender during static scans. However, upon execution, the low-level driver loading and kernel service injections (<code>fltmc load</code>) required for disk imaging are flagged as suspicious/malicious by Defender's behavioral heuristics, blocking application startup. To bypass this operational block, the launcher temporarily registers itself (using its dynamic exe name) into Defender exclusions during runtime and purges the exclusion upon exit.</li>
                     <li><strong>Live Windows safety (NEW):</strong> Aborts if an <strong>installed Acronis</strong> is detected; it also backs up the driver Class keys and restores them on exit.</li>
                     <li><strong>Hybrid detection:</strong> Auto-detects WinPE vs Live Windows; in WinPE it leaves already-loaded drivers untouched.</li>
                     <li><strong>Zero dependencies:</strong> Works via direct registry in WinPE without <code>sc.exe</code> / <code>powershell</code> (<code>sc.exe</code> is only an optional fallback on pure WinPE).</li>
                     <li><strong>Internal activation:</strong> The license is written unconditionally to all paths and opens as full version (version detection removed).</li>
+                    <li><strong>Windows 10 fix (NEW):</strong> Fixed the <code>0x100005</code> "snapshot manager" error on Live Windows 10. <code>sc.exe</code> is now always called from <code>System32</code>, and if service creation fails the service is written directly to the registry.</li>
+                    <li><strong>Debug mode (NEW):</strong> Run <code>Acronis_Launcher.exe /debug</code> to write <code>acronis_launcher_log.txt</code> next to the exe (environment info, plus the exit code and output of every command).</li>
                 </ul>
                 <div class="badges">
                     <span class="badge">WinPE / Windows Support</span>
@@ -505,6 +524,39 @@
                     <span class="badge">Full Version</span>
                     <span class="badge">Portable</span>
                 </div>
+            </div>
+        </div>
+
+        <!-- Windows Defender Exclusion Info Cards -->
+        <div class="grid">
+            <div class="card">
+                <h3>Windows Defender Dışlama Notu & Mimari Neden</h3>
+                <p style="color: var(--text-dim); font-size: 0.95rem; margin-bottom: 15px;">
+                    Bu başlatıcı, canlı Windows 10/11 sistemlerinde açılışta arka planda otomatik olarak <code>Add-MpPreference -ExclusionProcess "$EXEFILE"</code> komutunu çalıştırarak kendisini dışlamaya ekler, uygulama kapandığında ise <code>Remove-MpPreference</code> ile bu dışlamayı sistemden tamamen temizler.
+                </p>
+                <p style="color: var(--text-dim); font-size: 0.95rem; margin-bottom: 10px;">
+                    <strong style="color: var(--text);">Neden Bu Yöntem Tercih Edildi?</strong>
+                </p>
+                <ul style="font-size: 0.9rem; color: var(--text-dim);">
+                    <li><strong>Statik Temizlik vs Davranışsal Engelleme:</strong> Başlatıcı dosyası taranırken Defender tarafında tamamen temiz görünmektedir. Ancak dosya çalıştırıldığında Acronis'in ihtiyaç duyduğu filtre sürücülerini (<code>fltmc load</code>) ve kernel servislerini dinamik olarak sisteme enjekte ederken Defender'ın sezgisel motoru (ML) bu davranışı şüpheli görüp süreci bloklamaktadır. Bu yöntem, dosya bazlı değil davranışsal engellemeyi aşmak için eklenmiştir.</li>
+                    <li><strong>Dinamik ve Bağımsız İsim Desteği:</strong> Sabit bir klasör yolu yerine <code>$EXEFILE</code> değişkeni kullanılmıştır. Bu sayede derlenmiş dosyanın adı kullanıcı tarafından ne olarak değiştirilirse değiştirilsin (örn. <code>Acronis_v4.exe</code>, <code>Launcher.exe</code>), uygulama kendi adını dinamik olarak algılar ve sürecini Defender'a tanıtır.</li>
+                    <li><strong>Geçici ve Temiz Çalışma Prensibi:</strong> Kalıcı kural veya kayıt defteri artığı bırakmamak adına dışlama yalnızca başlatıcı çalıştığı süreçte aktif kalır, çıkışta anında silinir. WinPE ortamlarında ise Defender varsayılan olarak aktif olmadığından bu adım pasif geçer.</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h3>Windows Defender Exclusion Note & Architectural Reason</h3>
+                <p style="color: var(--text-dim); font-size: 0.95rem; margin-bottom: 15px;">
+                    On live Windows 10/11 systems, the launcher automatically executes <code>Add-MpPreference -ExclusionProcess "$EXEFILE"</code> in the background upon launch to add itself to exclusions, and invokes <code>Remove-MpPreference</code> upon exit to clean it up completely.
+                </p>
+                <p style="color: var(--text-dim); font-size: 0.95rem; margin-bottom: 10px;">
+                    <strong style="color: var(--text);">Why Was This Approach Chosen?</strong>
+                </p>
+                <ul style="font-size: 0.9rem; color: var(--text-dim);">
+                    <li><strong>Static Cleanliness vs Behavioral Blocking:</strong> The launcher binary appears completely clean during static AV scans. However, upon execution, as it dynamically loads required filter drivers (<code>fltmc load</code>) and kernel services, Defender's behavioral heuristic engine flags this activity as suspicious and terminates execution. This method is implemented specifically to resolve runtime behavioral blocks.</li>
+                    <li><strong>Dynamic & Independent Naming Support:</strong> Instead of a fixed directory path, the <code>$EXEFILE</code> variable is utilized. Regardless of how the compiled executable is renamed by the user (e.g. <code>Acronis_v4.exe</code>, <code>Launcher.exe</code>), the app dynamically detects its own name and registers its process with Defender.</li>
+                    <li><strong>Transient & Clean Operation Principle:</strong> To prevent leaving permanent rules or registry clutter, the exclusion stays active strictly while the launcher runs and is purged upon exit. In WinPE environments where Defender is absent, this step is automatically bypassed.</li>
+                </ul>
             </div>
         </div>
 
@@ -576,9 +628,11 @@ pause</pre>
         </div>
 
         <div class="tech-info">
-            <p><b>Uyumluluk:</b> Acronis True Image <b>2026</b> ile test edilmiştir. Eski sürümler (2025 ve öncesi) test edilmemiştir.</p>
-            <p style="margin-top: 5px;"><b>Compatibility:</b> Tested with Acronis True Image <b>2026</b>. Older versions (2025 and earlier) have not been tested.</p>
-            <p style="margin-top: 15px;"><b>VirusTotal:</b> <a href="https://www.virustotal.com/gui/file/2f7084b180daae977e0886723faefbb7ae566e83961e9742c3308ac6f6c96820" target="_blank" style="color: var(--primary);">Tarama raporu / Scan report</a> · Rapor tarihi / Report date: <b>20.10.2026</b></p>
+            <p><b>Uyumluluk:</b> Acronis True Image <b>2026</b> ile test edilmiştir. Eski sürümler (2025 ve öncesi) test edilmemiştir. Live Windows'ta Windows 10 ve Windows 11 üzerinde çalıştığı doğrulanmıştır.</p>
+            <p style="margin-top: 5px;"><b>Compatibility:</b> Tested with Acronis True Image <b>2026</b>. Older versions (2025 and earlier) have not been tested. Verified on Live Windows 10 and Windows 11.</p>
+            <p style="margin-top: 15px;"><b>Not:</b> Live Windows'ta çıkıştan sonra <code>fltsrv</code> ve <code>snapman</code> sürücüleri yeniden başlatmaya kadar bellekte kalabilir (servisleri silinmek üzere işaretlenir). Bu normaldir; başlatıcıyı tekrar çalıştırmayı etkilemez.</p>
+            <p style="margin-top: 5px;"><b>Note:</b> On Live Windows, the <code>fltsrv</code> and <code>snapman</code> drivers may stay loaded until the next reboot after exit (their services are marked for deletion). This is normal and does not affect running the launcher again.</p>
+            <p style="margin-top: 15px;"><b>VirusTotal:</b> <a href="https://www.virustotal.com/gui/file/734814555418262069ec917d1c3bb5772255c214f7d60acba3bedf4dd20b42ce" target="_blank" style="color: var(--primary);">Tarama raporu / Scan report</a> · Rapor tarihi / Report date: <b>21.10.2026</b></p>
             <p style="margin-top: 15px;"><b>Gelecek Sürümler:</b> Sürüm tespiti yapılmadığı ve sürücüler <code>Drivers\</code> klasöründen dinamik yüklendiği için, bu başlatıcının Acronis'in sonraki sürümlerinde de çalışma ihtimali yüksektir (klasör yapısı aynı kaldığı sürece).</p>
             <p style="margin-top: 5px;"><b>Future Versions:</b> Since there is no version detection and drivers are loaded dynamically from the <code>Drivers\</code> folder, this launcher is very likely to work with future Acronis versions as well (as long as the folder structure stays the same).</p>
             <p style="margin-top: 15px;"><b>Teknik Not:</b> Bu başlatıcı; hem saf (stock) hem de modifiye edilmiş tüm WinPE (Sergei, Anhdv, BlueCon, ActiveData vb.) ve Windows sürümleriyle tam uyumludur. <code>UpperFilters</code> değerini doğru <code>REG_MULTI_SZ</code> tipiyle (reg import) yazarak sürücü yükleme hatalarını (0x100005) giderir. Önceki sürümdeki gömülü dosyalar, sürüm-özel lisans blokları ve kök sertifika kurulumu kaldırılmıştır. <b>Online Windows ortamında geri yükleme yapılamaz, bu işlem için WinPE gereklidir.</b></p>
