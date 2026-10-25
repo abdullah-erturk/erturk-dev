@@ -404,5 +404,25 @@
         ]
       }
     ]
+  },
+  {
+    "id": "Android",
+    "title_tr": "Android",
+    "title_en": "Android",
+    "icon": "fa-brands fa-android",
+    "cards": [
+      {
+        "title": "DuoPanel (for Android Head Unit)",
+        "icon": "fa-solid fa-table-columns",
+        "desc_tr": "Araç ekranları için iki uygulamayı yan yana açan bölünmüş ekran başlatıcısı",
+        "desc_en": "A split-screen launcher that opens two apps side by side on car head units",
+        "links": [
+          {
+            "type": "github",
+            "url": "https://github.com/abdullah-erturk/DuoPanel-for-Android-Head-Unity-"
+          }
+        ]
+      }
+    ]
   }
 ]
