@@ -116,14 +116,19 @@
         ]
       },
       {
-        "title": "Secure Encode",
+        "title": "Secure Encrypt with AES-256",
         "icon": "fa-solid fa-shield-halved",
-        "desc_tr": "Betik ve metin dosyalarını güvenli biçimde kodlayıp yetkisiz erişime karşı koruyan araç.",
-        "desc_en": "A tool that securely encodes script and text files to protect them against unauthorized access.",
+        "desc_tr": "Dosya ve klasörleri isteğe bağlı AES-256 parola / anahtar dosyası koruması ile kendi kendini açabilen tek bir .cmd arşivine dönüştüren bir Windows betiği.",
+        "desc_en": "A Windows script that converts files and folders into a single, self-extracting .cmd archive, with optional AES-256 password / key file protection.",
         "links": [
           {
             "type": "github",
             "url": "https://github.com/abdullah-erturk/Secure-Encode"
+          },
+          {
+            "type": "info",
+            "url": "https://erturk-dev.netlify.app/secureencrypt",
+            "text": "SecureEncrypt Web"
           }
         ]
       },
