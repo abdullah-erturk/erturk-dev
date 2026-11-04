@@ -684,6 +684,12 @@
       <span id="historyBtnText">Tarihe Dokun</span>
     </a>
   </div>
+  <div style="margin-top: 14px;">
+    <a id="secureBtn" href="https://erturk-dev.netlify.app/secureencrypt" target="_blank" class="btn-history">
+      <span style="font-size:18px;">🔐</span>
+      <span id="secureBtnText">SecureEncrypt Web</span>
+    </a>
+  </div>
 </div>
 
 <!-- Görünüm Seçici -->
@@ -712,6 +718,7 @@ const translations = {
     intro4: '💞️ Her zaman yeni başlayan biriyim, bu yüzden öğrenmeye daha açığım.',
     intro5: 'Projelerimi beğenirseniz Github üzerinden oy verin ya da bana bir kahve ısmarlayın ☕',
     historyBtn: 'Tarihe Dokun',
+    secureBtn: 'SecureEncrypt Web',
     githubLink: "GitHub'da Görüntüle",
     infoLink: "Bilgi",
     playerTitle: 'Mini Player',
@@ -732,6 +739,7 @@ const translations = {
     intro4: '💞️ I am always a beginner, so I am more open to learning.',
     intro5: 'If you like my projects, vote on GitHub or buy me a coffee ☕',
     historyBtn: 'Touch History',
+    secureBtn: 'SecureEncrypt Web',
     githubLink: 'View on GitHub',
     infoLink: "Info",
     playerTitle: 'Mini Player',
@@ -766,6 +774,8 @@ function applyLanguage(lang){
   });
   const hb = document.getElementById('historyBtnText');
   if(hb) hb.textContent = t.historyBtn;
+  const sb = document.getElementById('secureBtnText');
+  if(sb) sb.textContent = t.secureBtn;
 
   // Kart açıklamalarını güncelle
   document.querySelectorAll('.card-desc').forEach(el => {
