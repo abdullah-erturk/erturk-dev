@@ -682,13 +682,15 @@ if (typeof globalThis !== 'undefined') globalThis.SEcore = SEcore;
       li.appendChild(x); ul.appendChild(li);
     });
   }
-  $('btnAddFiles').onclick = function () { $('inFiles').click(); };
-  $('btnAddDir').onclick = function () { $('inDir').click(); };
+  // the input is emptied BEFORE the picker opens (so the same file can be chosen again), never right after the choice:
+  // on Android the chosen files must stay referenced by the input while they are being read
+  $('btnAddFiles').onclick = function () { $('inFiles').value = ''; $('inFiles').click(); };
+  $('btnAddDir').onclick = function () { $('inDir').value = ''; $('inDir').click(); };
   $('btnClear').onclick = function () { encItems = []; renderList(); lastEnc = null; $('resEnc').innerHTML = ''; show('msgEnc', '', ''); };
-  $('inFiles').onchange = function () { Array.prototype.forEach.call(this.files, function (f) { addItem(f.name, f, false); }); this.value = ''; renderList(); };
+  $('inFiles').onchange = function () { Array.prototype.forEach.call(this.files, function (f) { addItem(f.name, f, false); }); renderList(); };
   $('inDir').onchange = function () {
     Array.prototype.forEach.call(this.files, function (f) { addItem(f.webkitRelativePath || f.name, f, false); });
-    this.value = ''; renderList();
+    renderList();
   };
 
   function readEntries(reader) {
@@ -777,9 +779,9 @@ if (typeof globalThis !== 'undefined') globalThis.SEcore = SEcore;
   $('pw1').oninput = meter;
 
   function pickKf(btn, input, nameEl, clearBtn, set) {
-    $(btn).onclick = function () { $(input).click(); };
+    $(btn).onclick = function () { $(input).value = ''; $(input).click(); };
     $(input).onchange = function () {
-      var f = this.files[0]; this.value = '';
+      var f = this.files[0];
       if (!f) return;
       f.arrayBuffer().then(function (b) { set(new Uint8Array(b)); $(nameEl).textContent = f.name; if (clearBtn) $(clearBtn).classList.remove('hidden'); });
     };
@@ -875,8 +877,8 @@ if (typeof globalThis !== 'undefined') globalThis.SEcore = SEcore;
       decMeta = SEcore.inspect(u8); decBuf = u8; decInfo(); $('btnDecrypt').disabled = false;
     }).catch(function (e) { show('msgDec', 'bad', function () { return errText(e); }); });
   }
-  $('btnPickDec').onclick = function () { $('inDec').click(); };
-  $('inDec').onchange = function () { if (this.files[0]) loadDec(this.files[0]); this.value = ''; };
+  $('btnPickDec').onclick = function () { $('inDec').value = ''; $('inDec').click(); };
+  $('inDec').onchange = function () { if (this.files[0]) loadDec(this.files[0]); };
 
   $('btnDecrypt').onclick = function () {
     if (!decBuf) return;
