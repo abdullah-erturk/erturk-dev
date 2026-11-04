@@ -89,6 +89,9 @@ footer p{margin:6px 0}
 .kf .nm{color:var(--muted);font-size:.88rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
 @media (max-width:520px){ .wrap{padding:14px 12px 30px} .card{padding:14px} }
 .two{display:grid;grid-template-columns:1fr;gap:0 12px}
+a.homebtn{display:inline-flex;align-items:center;gap:6px;font:inherit;font-weight:600;color:var(--text);background:var(--field);border:1px solid var(--field-b);border-radius:10px;padding:9px 14px;text-decoration:none;white-space:nowrap}
+a.homebtn:hover{border-color:var(--accent2)}
+@media (max-width:520px){ #t_home{display:none} a.homebtn{padding:8px 10px} .logo{width:36px;height:36px} h1{font-size:1.08rem} header{gap:8px} #lang{padding:6px 6px} .sub{font-size:.8rem} }
 header{flex-wrap:wrap}
 header .tabs{flex:1 1 100%;order:5;margin:8px 0 0}
 /* wide screens: two columns (files on the left, options on the right) so that nothing has to be scrolled */
@@ -131,6 +134,7 @@ header .tabs{flex:1 1 100%;order:5;margin:8px 0 0}
   <header>
     <svg class="logo" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#3b6cf6"/><rect x="17" y="28" width="30" height="23" rx="4" fill="#fff"/><path d="M23 28v-6a9 9 0 0 1 18 0v6" fill="none" stroke="#fff" stroke-width="5"/></svg>
     <div class="grow"><h1>SecureEncrypt Web</h1><div class="sub" id="t_sub"></div></div>
+    <a class="homebtn" id="homeBtn" href="https://erturk-dev.netlify.app"><span aria-hidden="true">&#127968;</span><span id="t_home"></span></a>
     <div class="tabs" role="tablist">
       <button class="tab" id="tabEnc" role="tab" aria-selected="true"></button>
       <button class="tab" id="tabDec" role="tab" aria-selected="false"></button>
@@ -515,6 +519,7 @@ if (typeof globalThis !== 'undefined') globalThis.SEcore = SEcore;
       too_big: 'The selection is too large for the browser (limit about 1.5 GB in total).',
       no_stream: 'This browser lacks the compression API (CompressionStream). Please use a current Chrome, Edge, Firefox or Safari.',
       no_crypto: 'The browser cryptography API is not available. Open this page over HTTPS (or from a local file) in a current browser.',
+      home: 'Home',
       insecure: 'This page was opened over an insecure connection (plain http://), so encryption and decryption are switched off by the browser. Open it over https://, as http://localhost, or as a local file.',
       dir_hint: 'When you choose a folder, your browser may ask for permission to "upload" it. Your files are NOT uploaded anywhere: this only lets the page read the folder so it can encrypt it on your device.',
       skipped: 'NOT included (could not be read; a dropped folder that the browser does not pass on can be added with "Add folder..."): {0}',
@@ -554,6 +559,7 @@ if (typeof globalThis !== 'undefined') globalThis.SEcore = SEcore;
       too_big: 'Se\u00e7im taray\u0131c\u0131 i\u00e7in \u00e7ok b\u00fcy\u00fck (toplam yakla\u015f\u0131k 1,5 GB s\u0131n\u0131r\u0131).',
       no_stream: 'Bu taray\u0131c\u0131da s\u0131k\u0131\u015ft\u0131rma API\'si (CompressionStream) yok. L\u00fctfen g\u00fcncel Chrome, Edge, Firefox veya Safari kullan\u0131n.',
       no_crypto: 'Taray\u0131c\u0131n\u0131n \u015fifreleme API\'si kullan\u0131lam\u0131yor. Bu sayfay\u0131 g\u00fcncel bir taray\u0131c\u0131da HTTPS \u00fczerinden (ya da yerel dosya olarak) a\u00e7\u0131n.',
+      home: 'Ana sayfa',
       insecure: 'Bu sayfa g\u00fcvenli olmayan bir ba\u011flant\u0131yla (d\u00fcz http://) a\u00e7\u0131ld\u0131\u011f\u0131 i\u00e7in taray\u0131c\u0131 \u015fifreleme ve \u00e7\u00f6zmeyi kapat\u0131r. Sayfay\u0131 https:// \u00fczerinden, http://localhost olarak ya da yerel dosya olarak a\u00e7\u0131n.',
       dir_hint: 'Klas\u00f6r se\u00e7ti\u011finizde taray\u0131c\u0131 "y\u00fckleme" izni isteyebilir. Dosyalar\u0131n\u0131z hi\u00e7bir yere y\u00fcklenmez: bu izin yaln\u0131zca sayfan\u0131n klas\u00f6r\u00fc okuyup cihaz\u0131n\u0131zda \u015fifreleyebilmesi i\u00e7indir.',
       skipped: 'DAH\u0130L ED\u0130LMED\u0130 (okunamad\u0131; s\u00fcr\u00fckleyip b\u0131rak\u0131lan ama taray\u0131c\u0131n\u0131n iletmedi\u011fi bir klas\u00f6r "Klas\u00f6r ekle..." ile eklenebilir): {0}',
@@ -618,6 +624,7 @@ if (typeof globalThis !== 'undefined') globalThis.SEcore = SEcore;
     document.documentElement.lang = lang; $('lang').value = lang;
     $('t_sub').textContent = T.sub; $('t_priv').innerHTML = T.priv;
     $('tabEnc').textContent = T.tab_enc; $('tabDec').textContent = T.tab_dec;
+    $('t_home').textContent = T.home; $('homeBtn').title = T.home;
     $('t_insecure').textContent = T.insecure; $('t_insecure').classList.toggle('hidden', !!window.isSecureContext);
     $('t_dir_hint').textContent = T.dir_hint; $('t_drop_enc').textContent = T.drop_enc; $('btnAddFiles').textContent = T.add_files; $('btnAddDir').textContent = T.add_dir; $('btnClear').textContent = T.clear;
     $('t_pw').textContent = T.pw; $('t_pw2').textContent = T.pw2; $('t_pw_hint').textContent = T.pw_hint;
